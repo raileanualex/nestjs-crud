@@ -32,6 +32,7 @@ import { oO } from '@zmotivat0r/o0';
 import { plainToClass } from 'class-transformer';
 import {
   Brackets,
+  ColumnType,
   ConnectionOptions,
   DeepPartial,
   EntityMetadata,
@@ -1188,12 +1189,12 @@ export class TypeOrmCrudService<T> extends CrudService<T, DeepPartial<T>> {
 
       case '$contArr':
         this.checkFilterIsArray(cond);
-        str = `${field} @> ARRAY[:...${param}]`;
+        str = `${field} @> ARRAY[:...${param}]::${this.getColumnType(cond.field)}[]`;
         break;
 
       case '$intersectsArr':
         this.checkFilterIsArray(cond);
-        str = `${field} && ARRAY[:...${param}]`;
+        str = `${field} && ARRAY[:...${param}]::${this.getColumnType(cond.field)}[]`;
         break;
 
       /* istanbul ignore next */
@@ -1244,5 +1245,10 @@ export class TypeOrmCrudService<T> extends CrudService<T, DeepPartial<T>> {
     }
 
     return field;
+  }
+
+  protected getColumnType(field: string): ColumnType {
+    const column = this.repo.metadata.ownColumns.find((col) => col.propertyName === field);
+    return column.type;
   }
 }
