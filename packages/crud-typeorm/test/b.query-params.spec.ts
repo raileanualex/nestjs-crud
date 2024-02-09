@@ -815,7 +815,7 @@ describe('#crud-typeorm', () => {
       });
       it('should return with search, 21', async () => {
         const query = qb
-          .search({ name: { $eq: 'Project1' }, companyId: { $or: { $isnull: false, $eq: 1 } } })
+          .search({ name: { $eq: 'Project1' }, companyId: { $or: { $notnull: true, $eq: 1 } } })
           .query();
         const res = await projects2()
           .query(query)
