@@ -921,79 +921,57 @@ export class TypeOrmCrudService<T> extends CrudService<T, DeepPartial<T>> {
     if (isObject(object)) {
       const operators = objKeys(object);
 
-      if (operators.length === 1) {
+      if (operators.length === 1 && operators[0] !== '$or') {
         const operator = operators[0] as ComparisonOperator;
         const value = object[operator];
-
-        if (isObject(object.$or)) {
-          const orKeys = objKeys(object.$or);
-          this.setSearchFieldObjectCondition(
-            builder,
-            orKeys.length === 1 ? condition : '$or',
-            field,
-            object.$or,
-            customOperators,
-          );
-        } else {
-          this.builderSetWhere(
-            builder,
-            condition,
-            field,
-            value,
-            customOperators,
-            operator,
-          );
-        }
+        this.builderSetWhere(builder, condition, field, value, customOperators, operator);
       } else {
-        /* istanbul ignore else */
-        if (operators.length > 1) {
-          this.builderAddBrackets(
-            builder,
-            condition,
-            new Brackets((qb: any) => {
-              operators.forEach((operator: ComparisonOperator) => {
-                const value = object[operator];
+        this.builderAddBrackets(
+          builder,
+          condition,
+          new Brackets((qb: any) => {
+            operators.forEach((operator: ComparisonOperator) => {
+              const value = object[operator];
 
-                if (operator !== '$or') {
-                  this.builderSetWhere(
+              if (operator !== '$or') {
+                this.builderSetWhere(
+                  qb,
+                  condition,
+                  field,
+                  value,
+                  customOperators,
+                  operator,
+                );
+              } else {
+                const orKeys = objKeys(object.$or);
+
+                if (orKeys.length === 1) {
+                  this.setSearchFieldObjectCondition(
                     qb,
                     condition,
                     field,
-                    value,
+                    object.$or,
                     customOperators,
-                    operator,
                   );
                 } else {
-                  const orKeys = objKeys(object.$or);
-
-                  if (orKeys.length === 1) {
-                    this.setSearchFieldObjectCondition(
-                      qb,
-                      condition,
-                      field,
-                      object.$or,
-                      customOperators,
-                    );
-                  } else {
-                    this.builderAddBrackets(
-                      qb,
-                      condition,
-                      new Brackets((qb2: any) => {
-                        this.setSearchFieldObjectCondition(
-                          qb2,
-                          '$or',
-                          field,
-                          object.$or,
-                          customOperators,
-                        );
-                      }),
-                    );
-                  }
+                  this.builderAddBrackets(
+                    qb,
+                    condition,
+                    new Brackets((qb2: any) => {
+                      this.setSearchFieldObjectCondition(
+                        qb2,
+                        '$or',
+                        field,
+                        object.$or,
+                        customOperators,
+                      );
+                    }),
+                  );
                 }
-              });
-            }),
-          );
-        }
+              }
+            });
+          }),
+        );
       }
     }
   }
