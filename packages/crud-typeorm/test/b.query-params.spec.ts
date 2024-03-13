@@ -813,6 +813,16 @@ describe('#crud-typeorm', () => {
           .expect(200);
         expect(res.body).toBeArrayOfSize(14);
       });
+      it('should return with search, 21', async () => {
+        const query = qb
+          .search({ name: { $eq: 'Project1' }, companyId: { $or: { $notnull: true, $eq: 1 } } })
+          .query();
+        const res = await projects2()
+          .query(query)
+          .expect(200);
+        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body[0].id).toBe(1);
+      });
       it('should return with default filter, 1', async () => {
         const query = qb.search({ name: 'Project11' }).query();
         const res = await projects3()
