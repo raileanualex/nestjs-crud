@@ -1,4 +1,5 @@
 import {
+  isArrayFull,
   isArrayStrings,
   isEqual,
   isNil,
@@ -88,6 +89,9 @@ export function validateJoin(join: QueryJoin): void {
   }
   if (!isUndefined(join.select) && !isArrayStrings(join.select)) {
     throw new RequestQueryException('Invalid join select. Array of strings expected');
+  }
+  if (!isUndefined(join.on) && !isArrayFull(join.on)) {
+    join.on.map((condition) => validateCondition(condition, 'filter', {}));
   }
 }
 
