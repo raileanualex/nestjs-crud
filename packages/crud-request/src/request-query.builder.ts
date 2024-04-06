@@ -6,7 +6,7 @@ import {
   isString,
   isUndefined,
 } from '@dataui/crud-util';
-import { stringify } from 'qs';
+import { IStringifyOptions, stringify } from 'qs';
 
 import {
   CreateQueryParams,
@@ -58,6 +58,11 @@ export class RequestQueryBuilder {
   private paramNames: {
     [key in keyof RequestQueryBuilderOptions['paramNamesMap']]: string;
   } = {};
+  private joinConditionString: IStringifyOptions = {
+    encode: false,
+    delimiter: this.options.delimStr,
+    arrayFormat: 'indices',
+  };
   public queryObject: { [key: string]: any } = {};
   public queryString: string;
 
@@ -203,13 +208,28 @@ export class RequestQueryBuilder {
     );
   }
 
-  private addJoin(j: QueryJoin | QueryJoinArr): string {
-    const join = Array.isArray(j) ? { field: j[0], select: j[1] } : j;
-    validateJoin(join);
-    const d = this.options.delim;
-    const ds = this.options.delimStr;
+  private addJoin(join: QueryJoin | QueryJoinArr): string {
+    const { delim, delimStr } = this.options;
 
-    return join.field + (isArrayFull(join.select) ? d + join.select.join(ds) : '');
+    const normalizedJoin = Array.isArray(join)
+      ? { field: join[0], select: join[1], on: join[2] }
+      : join;
+
+    validateJoin(normalizedJoin);
+
+    const conditions = isArrayFull(normalizedJoin.on)
+      ? { on: normalizedJoin.on.map((condition) => this.cond(condition, 'filter')) }
+      : '';
+
+    const fieldPart = normalizedJoin.field;
+    const selectPart = isArrayFull(normalizedJoin.select)
+      ? delim + normalizedJoin.select.join(delimStr)
+      : '';
+    const conditionsPart = conditions
+      ? delim + stringify(conditions, this.joinConditionString)
+      : '';
+
+    return fieldPart + selectPart + conditionsPart;
   }
 
   private addSortBy(s: QuerySort | QuerySortArr): string {
