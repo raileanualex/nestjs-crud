@@ -610,6 +610,24 @@ export class TypeOrmCrudService<T> extends CrudService<T, DeepPartial<T>> {
     }
   }
 
+  private convertArrayToQuery(data: { str: string; params: { [key: string]: any } }[]): {
+    str: string;
+    params: { [key: string]: any };
+  } {
+    const queryStringParts: string[] = [];
+    const params: { [key: string]: any } = {};
+
+    for (const item of data) {
+      const { str, params: itemParams } = item;
+      queryStringParts.push(str);
+      Object.assign(params, itemParams);
+    }
+
+    const combinedString = queryStringParts.join(' AND ');
+
+    return { str: combinedString, params };
+  }
+
   protected setJoin(
     cond: QueryJoin,
     joinOptions: JoinOptions,
@@ -637,7 +655,15 @@ export class TypeOrmCrudService<T> extends CrudService<T, DeepPartial<T>> {
     const relationType = options.required ? 'innerJoin' : 'leftJoin';
     const alias = options.alias ? options.alias : allowedRelation.name;
 
-    builder[relationType](allowedRelation.path, alias);
+    if (cond.on) {
+      const conds = cond.on.map((condition, i) =>
+        this.mapOperatorsToQuery(condition, `andCondition${i}`, {}),
+      );
+      const { str, params } = this.convertArrayToQuery(conds);
+      builder[relationType](allowedRelation.path, alias, str, params);
+    } else {
+      builder[relationType](allowedRelation.path, alias);
+    }
 
     if (options.select !== false) {
       const columns = isArrayFull(cond.select)
