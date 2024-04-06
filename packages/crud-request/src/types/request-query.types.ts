@@ -11,9 +11,10 @@ export type QueryFilterArr = [string, ComparisonOperator, any?];
 export interface QueryJoin {
   field: string;
   select?: QueryFields;
+  on?: QueryFilter[];
 }
 
-export type QueryJoinArr = [string, QueryFields?];
+export type QueryJoinArr = [string, QueryFields?, QueryFilter[]?];
 
 export interface QuerySort {
   field: string;
