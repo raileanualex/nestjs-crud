@@ -218,6 +218,23 @@ _Examples:_
 
 **_Notice:_** primary field/column always persists in relational objects. To use nested relations, the parent level **MUST** be set before the child level like example above.
 
+### New Feature: Join Condition (on clause)
+
+The join parameter now supports specifying a WHERE condition within the ON clause of the join using the on property. This allows for more granular control over the joined data.
+
+> ?join=**relation**||**field1**,**field2**,...||on[0]=**field**||**\$condition**||**value**,on[1]=**field**||**\$condition**...&join=...
+
+_Examples:_
+
+Suppose you want to retrieve `Posts` along with their associated `Author` data, but you only want to include `Authors` where the `isActive` field is `true` and the `profilePicture` field is `null` (meaning the author doesn't have a profile picture set). You can achieve this with the following query string:
+
+> ?join=**author**||**fullName**,**email**||on[0]=**author.isActive**||**\$eq**||**true**&on[1]=**author.profilePicture**||**\$isnull**
+
+This query will join the `Post` entity with its related `Author` entity, but it will only include `Author` objects where:
+
+- The `isActive` field is set to `true`.
+- The `profilePicture` field is `null`.
+
 ### limit
 
 Receive `N` amount of entities.
@@ -330,10 +347,18 @@ qb.setFilter({ field: "foo", operator: CondOperator.NOT_NULL })
     value: "test"
   });
 
-qb.select(["foo", "bar"])
-  .setJoin({ field: "company" })
-  .setJoin({ field: "profile", select: ["name", "email"] })
-  .sortBy({ field: "bar", order: "DECS" })
+qb.select(['foo', 'bar'])
+  .setJoin({ field: 'company' })
+  .setJoin({ field: 'profile', select: ['name', 'email'] })
+  .setJoin({
+    field: 'boo',
+    select: ['status', 'date'],
+    on: [
+      { field: 'bar', operator: 'eq', value: 100 },
+      { field: 'baz', operator: 'isnull' },
+    ],
+  })
+  .sortBy({ field: 'bar', order: 'DECS' })
   .setLimit(20)
   .setPage(3)
   .resetCache()
