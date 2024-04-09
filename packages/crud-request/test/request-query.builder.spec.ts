@@ -93,7 +93,10 @@ describe('#request-query', () => {
         expect(qb.queryObject.filter).toIncludeSameMembers(expected);
       });
       it('should set filter, 4', () => {
-        qb.setFilter([['foo', 'eq', 'bar'], ['baz', 'ne', 'zoo']]);
+        qb.setFilter([
+          ['foo', 'eq', 'bar'],
+          ['baz', 'ne', 'zoo'],
+        ]);
         const expected = ['foo||eq||bar', 'baz||ne||zoo'];
         expect(qb.queryObject.filter).toIncludeSameMembers(expected);
       });
@@ -155,6 +158,15 @@ describe('#request-query', () => {
       it('should throw an error, 3', () => {
         expect((qb.setJoin as any).bind(qb, [{}])).toThrowError(RequestQueryException);
       });
+      it('should throw an error, 4', () => {
+        expect(
+          (qb.setJoin as any).bind(qb, {
+            field: 'bar',
+            select: ['a', 'b', 'c'],
+            on: [{}],
+          }),
+        ).toThrowError(RequestQueryException);
+      });
       it('should set join, 1', () => {
         qb.setJoin({ field: 'foo' });
         const expected = ['foo'];
@@ -178,6 +190,40 @@ describe('#request-query', () => {
       it('should set join, 5', () => {
         qb.setJoin([{ field: 'baz' }, ['foo', ['a', 'b', 'c']]]);
         const expected = ['baz', 'foo||a,b,c'];
+        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+      });
+      it('should set join, 6', () => {
+        qb.setJoin([
+          ['baz'],
+          ['foo', ['a', 'b', 'c']],
+          ['boo', ['a', 'b', 'c'], [{ field: 'bar', operator: 'eq', value: 100 }]],
+        ]);
+        const expected = ['baz', 'foo||a,b,c', 'boo||a,b,c||on[0]=bar||eq||100'];
+        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+      });
+      it('should set join, 7', () => {
+        qb.setJoin([
+          {
+            field: 'baz',
+            select: ['a', 'b', 'c'],
+            on: [{ field: 'bar', operator: 'eq', value: 100 }],
+          },
+        ]);
+        const expected = ['baz||a,b,c||on[0]=bar||eq||100'];
+        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+      });
+      it('should set join, 8', () => {
+        qb.setJoin([
+          {
+            field: 'baz',
+            select: ['a', 'b', 'c'],
+            on: [
+              { field: 'bar', operator: 'eq', value: 100 },
+              { field: 'foo', operator: 'isnull' },
+            ],
+          },
+        ]);
+        const expected = ['baz||a,b,c||on[0]=bar||eq||100,on[1]=foo||isnull'];
         expect(qb.queryObject.join).toIncludeSameMembers(expected);
       });
     });
@@ -206,7 +252,10 @@ describe('#request-query', () => {
         expect(qb.queryObject.sort).toIncludeSameMembers(expected);
       });
       it('should set sort, 2', () => {
-        qb.sortBy([{ field: 'foo', order: 'ASC' }, { field: 'bar', order: 'DESC' }]);
+        qb.sortBy([
+          { field: 'foo', order: 'ASC' },
+          { field: 'bar', order: 'DESC' },
+        ]);
         const expected = ['foo,ASC', 'bar,DESC'];
         expect(qb.queryObject.sort).toIncludeSameMembers(expected);
       });
@@ -329,7 +378,14 @@ describe('#request-query', () => {
           .select(['foo', 'bar'])
           .setFilter(['is', 'notnull'])
           .setOr({ field: 'ok', operator: 'ne', value: false })
-          .setJoin({ field: 'voo', select: ['h', 'data'] })
+          .setJoin({
+            field: 'voo',
+            select: ['h', 'data'],
+            on: [
+              { field: 'foo', operator: 'eq', value: 'baz' },
+              { field: 'bar', operator: 'isnull' },
+            ],
+          })
           .setLimit(1)
           .setOffset(2)
           .setPage(3)
@@ -338,7 +394,7 @@ describe('#request-query', () => {
           .setIncludeDeleted(1)
           .query(false);
         const expected =
-          'fields=foo,bar&filter[0]=is||notnull&or[0]=ok||ne||false&join[0]=voo||h,data&limit=1&offset=2&page=3&sort[0]=foo,DESC&cache=0&include_deleted=1';
+          'fields=foo,bar&filter[0]=is||notnull&or[0]=ok||ne||false&join[0]=voo||h,data||on[0]=foo||eq||baz,on[1]=bar||isnull&limit=1&offset=2&page=3&sort[0]=foo,DESC&cache=0&include_deleted=1';
         expect(test).toBe(expected);
       });
     });
@@ -375,7 +431,14 @@ describe('#request-query', () => {
           fields: ['foo', 'bar'],
           filter: ['is', 'notnull'],
           or: { field: 'ok', operator: 'ne', value: false },
-          join: { field: 'voo', select: ['h', 'data'] },
+          join: {
+            field: 'voo',
+            select: ['h', 'data'],
+            on: [
+              { field: 'foo', operator: 'eq', value: 'baz' },
+              { field: 'bar', operator: 'isnull' },
+            ],
+          },
           limit: 1,
           offset: 2,
           page: 3,
@@ -383,7 +446,7 @@ describe('#request-query', () => {
           resetCache: true,
         }).query(false);
         const expected =
-          'fields=foo,bar&filter[0]=is||notnull&or[0]=ok||ne||false&join[0]=voo||h,data&limit=1&offset=2&page=3&sort[0]=foo,DESC&cache=0';
+          'fields=foo,bar&filter[0]=is||notnull&or[0]=ok||ne||false&join[0]=voo||h,data||on[0]=foo||eq||baz,on[1]=bar||isnull&limit=1&offset=2&page=3&sort[0]=foo,DESC&cache=0';
         expect(test).toBe(expected);
       });
       it('should return a valid query string, 2', () => {

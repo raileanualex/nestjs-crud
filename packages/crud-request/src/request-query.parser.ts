@@ -40,6 +40,7 @@ import {
   SConditionAND,
   SFields,
 } from './types';
+import { IParseOptions, parse } from 'qs';
 
 // tslint:disable:variable-name ban-types
 export class RequestQueryParser implements ParsedRequestParams {
@@ -65,6 +66,10 @@ export class RequestQueryParser implements ParsedRequestParams {
   private _query: any;
   private _paramNames: string[];
   private _paramsOptions: ParamsOptions;
+
+  private _joinConditionParseOptions: IParseOptions = {
+    delimiter: this._options.delimStr,
+  };
 
   private get _options(): RequestQueryBuilderOptions {
     return RequestQueryBuilder.getOptions();
@@ -350,12 +355,25 @@ export class RequestQueryParser implements ParsedRequestParams {
     return condition;
   }
 
+  private parseJoinConditions(conditionsString: string): QueryFilter[] {
+    const conditions: string[] = parse(conditionsString, this._joinConditionParseOptions)[
+      'on'
+    ];
+    return conditions.map((cond: string) => this.conditionParser('filter', {}, cond));
+  }
+
   private joinParser(data: string): QueryJoin {
     const param = data.split(this._options.delim);
+    const field = param[0];
+    const selectString = param[1];
+    const conditions = param.slice(2).join(this._options.delim);
+
     const join: QueryJoin = {
-      field: param[0],
-      select: isStringFull(param[1]) ? param[1].split(this._options.delimStr) : undefined,
+      field,
+      select: selectString ? selectString.split(this._options.delimStr) : undefined,
+      on: isStringFull(conditions) ? this.parseJoinConditions(conditions) : undefined,
     };
+
     validateJoin(join);
 
     return join;
