@@ -401,7 +401,7 @@ Also you can specify what routes should be excluded or what routes whould be use
 
 _Optional_
 
-It's a set of query options fro GET request.
+It's a set of query options for GET request.
 
 #### allow
 
