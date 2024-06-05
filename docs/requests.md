@@ -358,7 +358,7 @@ qb.select(['foo', 'bar'])
       { field: 'baz', operator: 'isnull' },
     ],
   })
-  .sortBy({ field: 'bar', order: 'DECS' })
+  .sortBy({ field: 'bar', order: 'DESС' })
   .setLimit(20)
   .setPage(3)
   .resetCache()
