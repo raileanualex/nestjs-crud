@@ -24,9 +24,19 @@ import { SerializeHelper } from './serialize.helper';
 import { Swagger } from './swagger.helper';
 import { Validation } from './validation.helper';
 
+export interface SwaggerModels {
+  get?: any;
+  getMany?: any;
+  create?: any;
+  update?: any;
+  replace?: any;
+  delete?: any;
+  recover?: any;
+}
+
 export class CrudRoutesFactory {
   protected options: MergedCrudOptions;
-  protected swaggerModels: any = {};
+  protected swaggerModels: SwaggerModels = {};
 
   constructor(protected target: any, options: CrudOptions) {
     this.options = options;
@@ -72,6 +82,9 @@ export class CrudRoutesFactory {
     this.enableRoutes(routesSchema);
   }
 
+  /**
+   * merge options with global options that provided via CrudConfigService.load()
+   */
   protected mergeOptions() {
     // merge auth config
     const authOptions = R.getCrudAuthOptions(this.target);
@@ -94,7 +107,7 @@ export class CrudRoutesFactory {
     // merge routes config
     const routes = isObjectFull(this.options.routes) ? this.options.routes : {};
     this.options.routes = deepmerge(CrudConfigService.config.routes, routes, {
-      arrayMerge: (a, b, c) => b,
+      arrayMerge: (target, source, opts) => source,
     });
 
     // merge operators config
@@ -152,6 +165,11 @@ export class CrudRoutesFactory {
     R.setCrudOptions(this.options, this.target);
   }
 
+  /**
+   * an array of routes schema for methods (routes) to be generated for the target controller
+   * such as getManyBase, ...
+   * @returns
+   */
   protected getRoutesSchema(): BaseRoute[] {
     return [
       {
@@ -221,6 +239,19 @@ export class CrudRoutesFactory {
     ];
   }
 
+  /**
+   * generate `getManyBase()` method for the controller
+   * note that `this` here will refer to the target i.e. the controller
+   *
+   * the generated method is similar to:
+   * ```
+   *  class UserController{
+   *   getManyBase(req){
+   *    return this.service.getMany(req);
+   *   }
+   *  }
+   * ```
+   */
   protected getManyBase(name: BaseRouteName) {
     this.targetProto[name] = function getManyBase(req: CrudRequest) {
       return this.service.getMany(req);
@@ -269,6 +300,13 @@ export class CrudRoutesFactory {
     };
   }
 
+  /**
+   * check if the route can be created
+   * i.e. included in only[] or doesn't included in exclude[] options
+   * if only[] has values, exclude[] is ignored
+   * @param name
+   * @returns
+   */
   protected canCreateRoute(name: BaseRouteName) {
     const only = this.options.routes.only;
     const exclude = this.options.routes.exclude;
@@ -289,10 +327,30 @@ export class CrudRoutesFactory {
     return true;
   }
 
+  /**
+   * generate Swagger response DTO for each operation
+   * it uses options.serialize for each operation, or the model type (i.e. the entity)
+   * @returns an object contains DTO for each operation
+   * @example
+   * ```
+   * {
+   *  get: UserEntity,
+   *  getMany: createGetManyDto(UserEntity),
+   *  create: UserEntity,
+   *  update: UserEntity,
+   *  replace: UserEntity,
+   *  delete: UserEntity,
+   *  recover: UserEntity,
+   * }
+   * ```
+   */
   protected setResponseModels() {
+    // if model.type is a function or class, use it
+    // otherwise generate an empty DTO class
     const modelType = isFunction(this.modelType)
       ? this.modelType
       : SerializeHelper.createGetOneResponseDto(this.modelName);
+
     this.swaggerModels.get = isFunction(this.options.serialize.get)
       ? this.options.serialize.get
       : modelType;
@@ -314,10 +372,16 @@ export class CrudRoutesFactory {
     this.swaggerModels.recover = isFunction(this.options.serialize.recover)
       ? this.options.serialize.recover
       : modelType;
+
     Swagger.setExtraModels(this.swaggerModels);
   }
 
+  /**
+   * generate the controller's methods (routers), such as getManyBase(), ...
+   * @param routesSchema
+   */
   protected createRoutes(routesSchema: BaseRoute[]) {
+    // primary keys that are not disabled, i.e. doesn't have `{ disabled: true }`
     const primaryParams = this.getPrimaryParams().filter(
       (param) => !this.options.params[param].disabled,
     );
@@ -325,6 +389,7 @@ export class CrudRoutesFactory {
     routesSchema.forEach((route) => {
       if (this.canCreateRoute(route.name)) {
         // create base method
+        // call this.getManyBase("getManyBase"), and so on ...
         this[route.name](route.name);
         route.enable = true;
         // set metadata
@@ -431,6 +496,10 @@ export class CrudRoutesFactory {
     }
   }
 
+  /**
+   * get the params that has `primary: true`
+   * @returns
+   */
   protected getPrimaryParams(): string[] {
     return objKeys(this.options.params).filter(
       (param) => this.options.params[param] && this.options.params[param].primary,
@@ -450,6 +519,23 @@ export class CrudRoutesFactory {
     this.setDecorators(name);
   }
 
+  /**
+   * generate body DTO
+   * and add the NestJs ValidationPipe to create, update and replace operations
+   * ValidationPipe.group option is used to distinguish between the DTO for creating and the DTO for updating
+   * for example each prop in body is optional in "update", but required in "create" operation
+   * https://gid-oss.github.io/dataui-nestjs-crud/controllers/#request-validation
+   *
+   * ```
+   * class UserEntity{
+   *   @IsOptional({ groups: [UPDATE] })
+   *   @IsNotEmpty({ groups: [CREATE] })
+   *   @Column({ ...})
+   *   name: string;
+   * }
+   * ```
+   * @param name
+   */
   protected setRouteArgs(name: BaseRouteName) {
     let rest = {};
     const routes: BaseRouteName[] = [
@@ -459,6 +545,7 @@ export class CrudRoutesFactory {
       'replaceOneBase',
     ];
 
+    //  add ValidationPipe to create, update and replace operations
     if (isIn(name, routes)) {
       const action = this.routeNameAction(name);
       const hasDto = !isNil(this.options.dto[action]);
@@ -485,6 +572,12 @@ export class CrudRoutesFactory {
     }
   }
 
+  /**
+   * add metadata for interceptors to the routes
+   * including the built-in CrudRequestInterceptor, CrudResponseInterceptor
+   * and the interceptors provided by the user via options
+   * @param name
+   */
   protected setInterceptors(name: BaseRouteName) {
     const interceptors = this.options.routes[name].interceptors;
     R.setInterceptors(
@@ -506,35 +599,60 @@ export class CrudRoutesFactory {
     );
   }
 
+  /**
+   * add metadata for the action's name of the operation to the route method
+   * @param name
+   */
   protected setAction(name: BaseRouteName) {
     R.setAction(this.actionsMap[name], this.targetProto[name]);
   }
 
+  /**
+   * add metadata for Swagger's \@ApiOperation() to the method
+   * @param name
+   */
   protected setSwaggerOperation(name: BaseRouteName) {
     const summary = Swagger.operationsMap(this.modelName)[name];
+    // example: getManyBaseUsersControllerUserEntity
     const operationId = name + this.targetProto.constructor.name + this.modelName;
     Swagger.setOperation({ summary, operationId }, this.targetProto[name]);
   }
 
+  /**
+   * add metadata for Swagger's path params to the method
+   * i.e. @ApiParam()
+   * @param name
+   */
   protected setSwaggerPathParams(name: BaseRouteName) {
     const metadata = Swagger.getParams(this.targetProto[name]);
+    // operations that don't need the primary key
     const withoutPrimary: BaseRouteName[] = [
       'createManyBase',
       'createOneBase',
       'getManyBase',
     ];
 
+    // true if withoutPrimary[] includes the operation
     const removePrimary = isIn(name, withoutPrimary);
+
+    // get path params that are not disabled, and not primary key (if removePrimary is true)
+    // for this path `users/:id` the params are ['id']
     const params = objKeys(this.options.params)
       .filter((key) => !this.options.params[key].disabled)
       .filter((key) => !(removePrimary && this.options.params[key].primary))
+      // example: { id: opts.params.id, ... }
       .reduce((a, c) => ({ ...a, [c]: this.options.params[c] }), {});
 
     const pathParamsMeta = Swagger.createPathParamsMeta(params);
     Swagger.setParams([...metadata, ...pathParamsMeta], this.targetProto[name]);
   }
 
+  /**
+   * add metadata for Swagger's \@ApiQuery()
+   * @param name
+   */
   protected setSwaggerQueryParams(name: BaseRouteName) {
+    // existing metadata
     const metadata = Swagger.getParams(this.targetProto[name]);
     const queryParamsMeta = Swagger.createQueryParamsMeta(name, this.options);
     Swagger.setParams([...metadata, ...queryParamsMeta], this.targetProto[name]);
@@ -548,6 +666,13 @@ export class CrudRoutesFactory {
     Swagger.setResponseOk({ ...metadata, ...metadataToAdd }, this.targetProto[name]);
   }
 
+  /**
+   * get the Action's name
+   * @param name the route's name, such as getManyBase, createOneBase, ...
+   * @returns
+   * @example getOneBase -> get
+   * @example createOneBase -> create
+   */
   protected routeNameAction(name: BaseRouteName): string {
     return (
       name.split('OneBase')[0] || /* istanbul ignore next */ name.split('ManyBase')[0]

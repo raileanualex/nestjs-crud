@@ -5,6 +5,7 @@ import { MergedCrudOptions, ParamsOptions } from '../interfaces';
 import { BaseRouteName } from '../types';
 import { safeRequire } from '../util';
 import { R } from './reflection.helper';
+import { SwaggerModels } from '.';
 const pluralize = require('pluralize');
 
 export const swagger = safeRequire('@nestjs/swagger', () => require('@nestjs/swagger'));
@@ -16,6 +17,11 @@ export const swaggerPkgJson = safeRequire('@nestjs/swagger/package.json', () =>
 );
 
 export class Swagger {
+  /**
+   * an object of the operations summaries
+   * @param modelName
+   * @returns
+   */
   static operationsMap(modelName): { [key in BaseRouteName]: string } {
     return {
       getManyBase: `Retrieve multiple ${pluralize(modelName)}`,
@@ -43,13 +49,22 @@ export class Swagger {
     }
   }
 
-  static setExtraModels(swaggerModels: any) {
+  /**
+   * add swaggerModels to swaggerModels.get
+   * see `setResponseModels()` for an example of swagger models
+   *
+   * @param swaggerModels models to be added
+   */
+  static setExtraModels(swaggerModels: SwaggerModels) {
     /* istanbul ignore else */
     if (swaggerConst) {
+      // existing models array
       const meta = Swagger.getExtraModels(swaggerModels.get);
       const models: any[] = [
         ...meta,
         ...objKeys(swaggerModels)
+          // values
+          // todo: use Object.values(swaggerModels)
           .map((name) => swaggerModels[name])
           .filter((one) => one && one.name !== swaggerModels.get.name),
       ];
@@ -240,6 +255,12 @@ export class Swagger {
     }
   }
 
+  /**
+   * add metadata for Swagger's docs for path params, such as `users/:userId/posts/:postId` -> ['userId', 'postId']
+   * i.e. @ApiParam({name: "id", ...})
+   * @param options
+   * @returns
+   */
   static createPathParamsMeta(options: ParamsOptions): any[] {
     return swaggerConst
       ? objKeys(options).map((param) => ({
@@ -252,12 +273,19 @@ export class Swagger {
       : /* istanbul ignore next */ [];
   }
 
+  /**
+   * generate metadata for Swagger's \@ApiQuery()
+   * @param name
+   * @param options
+   * @returns
+   */
   static createQueryParamsMeta(name: BaseRouteName, options: MergedCrudOptions) {
     /* istanbul ignore if */
     if (!swaggerConst) {
       return [];
     }
 
+    // the default queryBuilder options
     const {
       delim: d,
       delimStr: coma,
@@ -277,6 +305,7 @@ export class Swagger {
     const docsLink = (a: string) =>
       `<a href="https://github.com/nestjsx/crud/wiki/Requests#${a}" target="_blank">Docs</a>`;
 
+    // Swagger docs for `?fields=`
     const fieldsMetaBase = {
       name: fields,
       description: `Selects resource fields. ${docsLink('select')}`,
@@ -304,6 +333,7 @@ export class Swagger {
           explode: false,
         };
 
+    // Swagger docs for `?search=`
     const searchMetaBase = {
       name: search,
       description: `Adds search condition. ${docsLink('search')}`,
@@ -314,6 +344,7 @@ export class Swagger {
       ? /* istanbul ignore next */ { ...searchMetaBase, type: 'string' }
       : { ...searchMetaBase, schema: { type: 'string' } };
 
+    // Swagger docs for `?filter=`
     const filterMetaBase = {
       name: filter,
       description: `Adds filter condition. ${docsLink('filter')}`,
@@ -341,6 +372,7 @@ export class Swagger {
           explode: true,
         };
 
+    // Swagger docs for `?or=`
     const orMetaBase = {
       name: or,
       description: `Adds OR condition. ${docsLink('or')}`,
@@ -368,6 +400,7 @@ export class Swagger {
           explode: true,
         };
 
+    // Swagger docs for `?sort=`
     const sortMetaBase = {
       name: sort,
       description: `Adds sort by field. ${docsLink('sort')}`,
@@ -395,6 +428,7 @@ export class Swagger {
           explode: true,
         };
 
+    // Swagger docs for `?join=`
     const joinMetaBase = {
       name: join,
       description: `Adds relational resources. ${docsLink('join')}`,
@@ -422,6 +456,7 @@ export class Swagger {
           explode: true,
         };
 
+    // Swagger docs for `?limit=`
     const limitMetaBase = {
       name: limit,
       description: `Limit amount of resources. ${docsLink('limit')}`,
@@ -432,6 +467,7 @@ export class Swagger {
       ? /* istanbul ignore next */ { ...limitMetaBase, type: 'integer' }
       : { ...limitMetaBase, schema: { type: 'integer' } };
 
+    // Swagger docs for `?offset=`
     const offsetMetaBase = {
       name: offset,
       description: `Offset amount of resources. ${docsLink('offset')}`,
@@ -442,6 +478,7 @@ export class Swagger {
       ? /* istanbul ignore next */ { ...offsetMetaBase, type: 'integer' }
       : { ...offsetMetaBase, schema: { type: 'integer' } };
 
+    // Swagger docs for `?page=`
     const pageMetaBase = {
       name: page,
       description: `Page portion of resources. ${docsLink('page')}`,
@@ -452,6 +489,7 @@ export class Swagger {
       ? /* istanbul ignore next */ { ...pageMetaBase, type: 'integer' }
       : { ...pageMetaBase, schema: { type: 'integer' } };
 
+    // Swagger docs for `?cache=`
     const cacheMetaBase = {
       name: cache,
       description: `Reset cache (if was enabled). ${docsLink('cache')}`,
@@ -467,6 +505,7 @@ export class Swagger {
         }
       : { ...cacheMetaBase, schema: { type: 'integer', minimum: 0, maximum: 1 } };
 
+    // Swagger docs for `?include_deleted=`
     const includeDeletedMetaBase = {
       name: includeDeleted,
       description: `Include deleted. ${docsLink('includeDeleted')}`,
@@ -522,8 +561,15 @@ export class Swagger {
     }
   }
 
+  /**
+   * get the query param names from queryBuilder options
+   * for example the query param `?fields=` can be `fields` or `select`
+   * @returns
+   */
   static getQueryParamsNames() {
     const qbOptions = RequestQueryBuilder.getOptions();
+
+    // get the default name for the query param
     const name = (n) => {
       const selected = qbOptions.paramNamesMap[n];
       return isString(selected) ? selected : selected[0];

@@ -10,6 +10,7 @@ export const isArrayFull = (val: any): boolean => Array.isArray(val) && hasLengt
 export const isArrayStrings = (val: any): boolean =>
   isArrayFull(val) && (val as string[]).every((v) => isStringFull(v));
 export const isObject = (val: any): boolean => typeof val === 'object' && !isNull(val);
+/** if the value is an object that contains at least one element */
 export const isObjectFull = (val: any) => isObject(val) && hasLength(objKeys(val));
 export const isNumber = (val: any): boolean =>
   typeof val === 'number' && !Number.isNaN(val) && Number.isFinite(val);

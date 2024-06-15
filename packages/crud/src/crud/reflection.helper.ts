@@ -101,6 +101,12 @@ export class R {
     return R.createCustomRouteArg(PARSED_CRUD_REQUEST_KEY, index);
   }
 
+  /**
+   * add pipes for the request's body
+   * @param index
+   * @param pipes
+   * @returns
+   */
   static setBodyArg(index: number, /* istanbul ignore next */ pipes: any[] = []) {
     return R.createRouteArg(RouteParamtypes.BODY, index, pipes);
   }
