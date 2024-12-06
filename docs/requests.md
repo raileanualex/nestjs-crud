@@ -135,7 +135,7 @@ _Syntax:_
 
 > ?filter=**field**||**\$condition**||**value**
 
-> ?join=**relation**&filter=**relation**.**field**||**\$condition**||**value**
+> ?join[]=**relation**&filter=**relation**.**field**||**\$condition**||**value**
 
 **_Notice:_** Using nested filter shall join relation first.
 
@@ -200,21 +200,21 @@ Receive joined relational objects in GET result (with all or selected fields). Y
 
 _Syntax:_
 
-> ?join=**relation**
+> ?join[]=**relation**
 
-> ?join=**relation**||**field1**,**field2**,...
+> ?join[]=**relation**||**field1**,**field2**,...
 
-> ?join=**relation1**||**field11**,**field12**,...&join=**relation1**.**nested**||**field21**,**field22**,...&join=...
+> ?join[]=**relation1**||**field11**,**field12**,...&join[]=**relation1**.**nested**||**field21**,**field22**,...&join[]=...
 
 _Examples:_
 
-> ?join=**profile**
+> ?join[]=**profile**
 
-> ?join=**profile**||**firstName**,**email**
+> ?join[]=**profile**||**firstName**,**email**
 
-> ?join=**profile**||**firstName**,**email**&join=**notifications**||**content**&join=**tasks**
+> ?join[]=**profile**||**firstName**,**email**&join[]=**notifications**||**content**&join[]=**tasks**
 
-> ?join=**relation1**&join=**relation1**.**nested**&join=**relation1**.**nested**.**deepnested**
+> ?join[]=**relation1**&join[]=**relation1**.**nested**&join[]=**relation1**.**nested**.**deepnested**
 
 **_Notice:_** primary field/column always persists in relational objects. To use nested relations, the parent level **MUST** be set before the child level like example above.
 
@@ -222,13 +222,13 @@ _Examples:_
 
 The join parameter now supports specifying a WHERE condition within the ON clause of the join using the on property. This allows for more granular control over the joined data.
 
-> ?join=**relation**||**field1**,**field2**,...||on[0]=**field**||**\$condition**||**value**,on[1]=**field**||**\$condition**...&join=...
+> ?join[]=**relation**||**field1**,**field2**,...||on[0]=**field**||**\$condition**||**value**,on[1]=**field**||**\$condition**...&join[]=...
 
 _Examples:_
 
 Suppose you want to retrieve `Posts` along with their associated `Author` data, but you only want to include `Authors` where the `isActive` field is `true` and the `profilePicture` field is `null` (meaning the author doesn't have a profile picture set). You can achieve this with the following query string:
 
-> ?join=**author**||**fullName**,**email**||on[0]=**author.isActive**||**\$eq**||**true**&on[1]=**author.profilePicture**||**\$isnull**
+> ?join[]=**author**||**fullName**,**email**||on[0]=**author.isActive**||**\$eq**||**true**&on[1]=**author.profilePicture**||**\$isnull**
 
 This query will join the `Post` entity with its related `Author` entity, but it will only include `Author` objects where:
 
