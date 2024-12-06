@@ -394,6 +394,7 @@ Also you can specify what routes should be excluded or what routes whould be use
     maxLimit?: number;
     cache?: number | false;
     alwaysPaginate?: boolean;
+    softDelete?: boolean;
   },
   ...
 })
@@ -401,7 +402,7 @@ Also you can specify what routes should be excluded or what routes whould be use
 
 _Optional_
 
-It's a set of query options fro GET request.
+It's a set of query options for GET request.
 
 #### allow
 
@@ -631,6 +632,18 @@ Cache can be reseted by using `cache=0` query parameter in your GET requests.
 _Optional_
 
 Either or not always return an object with paginated data. Can be defined [globally](#global-options) as well.
+
+#### softDelete
+
+```typescript
+{
+  softDelete: true,
+}
+```
+
+_Optional_
+
+A boolean value indicating whether the item should be soft-deleted. If set to true, the item will be soft-deleted instead of being permanently removed from the database.
 
 ### dto
 

@@ -1,4 +1,4 @@
-export * from './crud/crud-routes.factory';
+export * from './crud';
 export * from './decorators';
 export * from './enums';
 export * from './interfaces';

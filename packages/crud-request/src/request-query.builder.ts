@@ -77,6 +77,10 @@ export class RequestQueryBuilder {
     };
   }
 
+  /**
+   * get the default options of the query builder
+   * @returns
+   */
   static getOptions(): RequestQueryBuilderOptions {
     return RequestQueryBuilder._options;
   }
