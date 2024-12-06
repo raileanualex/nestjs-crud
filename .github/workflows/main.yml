@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     container: node:20
     env:
-      COMPOSE_FILE: ./docker-compose.yml
+      COMPOSE_FILE: docker-compose.yml
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
