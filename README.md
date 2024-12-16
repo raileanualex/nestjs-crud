@@ -47,35 +47,6 @@ yarn add @n4it/crud-typeorm
 - :horse_racing: [CRUD ORM Services](https://gid-oss.github.io/dataui-nestjs-crud/services/)
 - :trumpet: [Handling Requests](https://gid-oss.github.io/dataui-nestjs-crud/requests/#description)
 
-## Build library and run tests
-
-```
-yarn install
-yarn clean
-yarn build
-docker compose up -d
-yarn test:coverage
-```
-
-## Make a release
-
-- Merge a PR on master.
-- Pull and checkout master
-- Update Changelog and commit
-- Run tests `docker-compose up -d && yarn rebuild && yarn test:coverage`
-- Run `yarn pub` - this will publish on the npm repo (need to be logged under dataui `yarn login`)
-
-## Support
-
-Any support is welcome. At least you can give us a star :star:
 
 ## Contributors
-
-### Code Contributors
-
-This project exists thanks to all the people who contributed. [[Contribute](CODE_OF_CONDUCT.md)].
-<a href="https://github.com/gid-oss/dataui-nestjs-crud/graphs/contributors"><img src="https://opencollective.com/nestjsx/contributors.svg?width=890&button=false" /></a>
-
-
-#### Organizations
-Currently this project is fully managed by N4IT.
+This project exists thanks to all the people who contributed. Currently this project is fully maintained and actively further developed by N4IT.
