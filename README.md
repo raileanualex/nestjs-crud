@@ -9,9 +9,6 @@
 We believe that everyone who's working with NestJs and building some RESTful services and especially some CRUD functionality will find `@n4it/crud` microframework very useful.
 
 ## Features
-
-<img align="right" src="https://raw.githubusercontent.com/gid-oss/dataui-nestjs-crud/master/img/crud-usage2.png" alt="CRUD usage" />
-
 - :electric_plug: Super easy to install and start using the full-featured controllers and services :point_right:
 
 - :octopus: DB and service agnostic extendable CRUD controllers
