@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
-import { RequestQueryBuilder } from '@dataui/crud-request';
-import { isString, objKeys } from '@dataui/crud-util';
-import { MergedCrudOptions, ParamsOptions } from '../interfaces';
+import { RequestQueryBuilder } from '@n4it/crud-request';
+import { isString, objKeys } from '@n4it/crud-util';
+import type { MergedCrudOptions, ParamsOptions } from '../interfaces';
 import { BaseRouteName } from '../types';
 import { safeRequire } from '../util';
 import { R } from './reflection.helper';

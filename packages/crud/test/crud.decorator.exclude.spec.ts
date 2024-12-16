@@ -42,9 +42,7 @@ describe('#crud', () => {
 
     describe('#getManyBase excluded', () => {
       it('should return status 404', () => {
-        return request(server)
-          .get('/test')
-          .expect(404);
+        return request(server).get('/test').expect(404);
       });
     });
   });
@@ -82,17 +80,13 @@ describe('#crud', () => {
 
     describe('#getManyBase only', () => {
       it('should return status 200', () => {
-        return request(server)
-          .get('/test')
-          .expect(200);
+        return request(server).get('/test').expect(200);
       });
     });
 
     describe('#getOneBase excluded', () => {
       it('should return status 404', () => {
-        return request(server)
-          .get('/test/1')
-          .expect(404);
+        return request(server).get('/test/1').expect(404);
       });
     });
   });

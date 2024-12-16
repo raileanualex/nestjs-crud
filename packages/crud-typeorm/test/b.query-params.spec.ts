@@ -2,7 +2,7 @@ import { BadRequestException, Controller, INestApplication } from '@nestjs/commo
 import { APP_FILTER } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RequestQueryBuilder } from '@dataui/crud-request';
+import { RequestQueryBuilder } from '@n4it/crud-request';
 import 'jest-extended';
 import * as request from 'supertest';
 
@@ -649,43 +649,43 @@ describe('#crud-typeorm', () => {
       it('should return with search, 1', async () => {
         const query = qb.search({ id: 1 }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
       it('should return with search, 2', async () => {
         const query = qb.search({ id: 1, name: 'Project1' }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
       it('should return with search, 3', async () => {
         const query = qb.search({ id: 1, name: { $eq: 'Project1' } }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
       it('should return with search, 4', async () => {
         const query = qb.search({ name: { $eq: 'Project1' } }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
       it('should return with search, 5', async () => {
         const query = qb.search({ id: { $notnull: true, $eq: 1 } }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
       it('should return with search, 6', async () => {
         const query = qb.search({ id: { $or: { $isnull: true, $eq: 1 } } }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
       it('should return with search, 7', async () => {
         const query = qb.search({ id: { $or: { $eq: 1 } } }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
       it('should return with search, 8', async () => {
@@ -693,59 +693,59 @@ describe('#crud-typeorm', () => {
           .search({ id: { $notnull: true, $or: { $eq: 1, $in: [30, 31] } } })
           .query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
       it('should return with search, 9', async () => {
         const query = qb.search({ id: { $notnull: true, $or: { $eq: 1 } } }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
       it('should return with search, 10', async () => {
         const query = qb.search({ id: null }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(0);
+        expect(res.body).toHaveLength(0);
       });
       it('should return with search, 11', async () => {
         const query = qb
           .search({ $and: [{ id: { $notin: [5, 6, 7, 8, 9, 10] } }, { isActive: true }] })
           .query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(4);
+        expect(res.body).toHaveLength(4);
       });
       it('should return with search, 12', async () => {
         const query = qb
           .search({ $and: [{ id: { $notin: [5, 6, 7, 8, 9, 10] } }] })
           .query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(14);
+        expect(res.body).toHaveLength(14);
       });
       it('should return with search, 13', async () => {
         const query = qb.search({ $or: [{ id: 54 }] }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(0);
+        expect(res.body).toHaveLength(0);
       });
       it('should return with search, 14', async () => {
         const query = qb
           .search({ $or: [{ id: 54 }, { id: 33 }, { id: { $in: [1, 2] } }] })
           .query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(2);
+        expect(res.body).toHaveLength(2);
         expect(res.body[0].id).toBe(1);
         expect(res.body[1].id).toBe(2);
       });
       it('should return with search, 15', async () => {
         const query = qb.search({ $or: [{ id: 54 }], name: 'Project1' }).query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(0);
+        expect(res.body).toHaveLength(0);
       });
       it('should return with search, 16', async () => {
         const query = qb
           .search({ $or: [{ isActive: false }, { id: 3 }], name: 'Project3' })
           .query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(3);
       });
       it('should return with search, 17', async () => {
@@ -753,7 +753,7 @@ describe('#crud-typeorm', () => {
           .search({ $or: [{ isActive: false }, { id: { $eq: 3 } }], name: 'Project3' })
           .query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(3);
       });
       it('should return with search, 18', async () => {
@@ -764,7 +764,7 @@ describe('#crud-typeorm', () => {
           })
           .query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(3);
       });
       it('should return with search, 19', async () => {
@@ -783,7 +783,7 @@ describe('#crud-typeorm', () => {
           })
           .query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(3);
       });
       it('should return with search, 20', async () => {
@@ -793,7 +793,7 @@ describe('#crud-typeorm', () => {
           })
           .query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(14);
+        expect(res.body).toHaveLength(14);
       });
       it('should return with search, 21', async () => {
         const query = qb
@@ -803,73 +803,73 @@ describe('#crud-typeorm', () => {
           })
           .query();
         const res = await projects2().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
       it('should return with default filter, 1', async () => {
         const query = qb.search({ name: 'Project11' }).query();
         const res = await projects3().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(11);
       });
       it('should return with default filter, 2', async () => {
         const query = qb.search({ name: 'Project1' }).query();
         const res = await projects3().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(0);
+        expect(res.body).toHaveLength(0);
       });
       it('should return with default filter, 3', async () => {
         const query = qb.search({ name: 'Project2' }).query();
         const res = await projects4().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(2);
       });
       it('should return with default filter, 4', async () => {
         const query = qb.search({ name: 'Project11' }).query();
         const res = await projects4().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(0);
+        expect(res.body).toHaveLength(0);
       });
       it('should return with $eqL search operator', async () => {
         const query = qb.search({ name: { $eqL: 'project1' } }).query();
         const res = await projects4().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
       });
       it('should return with $neL search operator', async () => {
         const query = qb.search({ name: { $neL: 'project1' } }).query();
         const res = await projects4().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(9);
+        expect(res.body).toHaveLength(9);
       });
       it('should return with $startsL search operator', async () => {
         const query = qb.search({ email: { $startsL: '2' } }).query();
         const res = await request(server).get('/users').query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(3);
+        expect(res.body).toHaveLength(3);
       });
       it('should return with $endsL search operator', async () => {
         const query = qb.search({ domain: { $endsL: 'AiN10' } }).query();
         const res = await request(server).get('/companies').query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(1);
+        expect(res.body).toHaveLength(1);
         expect(res.body[0].domain).toBe('Domain10');
       });
       it('should return with $contL search operator', async () => {
         const query = qb.search({ email: { $contL: '1@' } }).query();
         const res = await request(server).get('/users').query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(3);
+        expect(res.body).toHaveLength(3);
       });
       it('should return with $exclL search operator', async () => {
         const query = qb.search({ email: { $exclL: '1@' } }).query();
         const res = await request(server).get('/users').query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(18);
+        expect(res.body).toHaveLength(18);
       });
       it('should return with $inL search operator', async () => {
         const query = qb.search({ name: { $inL: ['name2', 'name3'] } }).query();
         const res = await request(server).get('/companies').query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(2);
+        expect(res.body).toHaveLength(2);
       });
       it('should return with $notinL search operator', async () => {
         const query = qb
           .search({ name: { $notinL: ['project7', 'project8', 'project9'] } })
           .query();
         const res = await projects4().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(7);
+        expect(res.body).toHaveLength(7);
       });
       it('should return with custom $customEqual search operator', async () => {
         const query = qb.search({ name: { $customEqual: 'Project7' } }).query();
@@ -881,7 +881,7 @@ describe('#crud-typeorm', () => {
           .search({ name: { $customArrayIn: ['Project7', 'Project8', 'Project9'] } })
           .query();
         const res = await projects4().query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(3);
+        expect(res.body).toHaveLength(3);
       });
       it("should throw an exception if custom search operator doesn't exist", async () => {
         const query = qb
@@ -892,7 +892,7 @@ describe('#crud-typeorm', () => {
       it('should search by display column name, but use dbName in sql query', async () => {
         const query = qb.search({ revisionId: 2 }).query();
         const res = await request(server).get('/notes').query(query).expect(200);
-        expect(res.body).toBeArrayOfSize(2);
+        expect(res.body).toHaveLength(2);
         expect(res.body[0].revisionId).toBe(2);
         expect(res.body[1].revisionId).toBe(2);
       });

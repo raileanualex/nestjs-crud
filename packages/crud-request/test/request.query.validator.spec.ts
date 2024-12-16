@@ -1,4 +1,4 @@
-import { RequestQueryException } from '@dataui/crud-request';
+import { RequestQueryException } from '@n4it/crud-request';
 import { validateComparisonOperator, validateUUID } from '../src/request-query.validator';
 
 describe('#request-query', () => {

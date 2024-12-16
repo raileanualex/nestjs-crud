@@ -52,10 +52,7 @@ describe('#crud', () => {
           email: 'test@test.com',
           age: 15,
         };
-        return request(server)
-          .post('/test')
-          .send(send)
-          .expect(201);
+        return request(server).post('/test').send(send).expect(201);
       });
       it('should return status 400', (done) => {
         const send: TestModel = {
@@ -82,10 +79,7 @@ describe('#crud', () => {
           email: 'test@test.com',
           age: 15,
         };
-        return request(server)
-          .patch('/test/1')
-          .send(send)
-          .expect(200);
+        return request(server).patch('/test/1').send(send).expect(200);
       });
       it('should return status 400', (done) => {
         const send: TestModel = {

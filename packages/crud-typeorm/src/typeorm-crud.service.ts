@@ -8,7 +8,7 @@ import {
   JoinOption,
   JoinOptions,
   QueryOptions,
-} from '@dataui/crud';
+} from '@n4it/crud';
 import {
   ComparisonOperator,
   ParsedRequestParams,
@@ -17,7 +17,7 @@ import {
   QuerySort,
   SCondition,
   SConditionKey,
-} from '@dataui/crud-request';
+} from '@n4it/crud-request';
 import {
   ClassType,
   hasLength,
@@ -27,8 +27,7 @@ import {
   isObject,
   isUndefined,
   objKeys,
-} from '@dataui/crud-util';
-import { oO } from '@zmotivat0r/o0';
+} from '@n4it/crud-util';
 import { plainToClass } from 'class-transformer';
 import {
   Brackets,
@@ -231,7 +230,7 @@ export class TypeOrmCrudService<T> extends CrudService<T, DeepPartial<T>> {
     const paramsFilters = this.getParamFilters(req.parsed);
     // disable cache while replacing
     req.options.query.cache = false;
-    const [_, found] = await oO(this.getOneOrFail(req, returnShallow));
+    const found = await this.getOneOrFail(req, returnShallow).catch(() => null);
     const toSave = !allowParamsOverride
       ? { ...(found || {}), ...dto, ...paramsFilters, ...req.parsed.authPersist }
       : {
@@ -1028,8 +1027,8 @@ export class TypeOrmCrudService<T> extends CrudService<T, DeepPartial<T>> {
     return query.sort && query.sort.length
       ? this.mapSort(query.sort)
       : options.sort && options.sort.length
-      ? this.mapSort(options.sort)
-      : {};
+        ? this.mapSort(options.sort)
+        : {};
   }
 
   protected getFieldWithAlias(field: string, sort: boolean = false) {
@@ -1256,7 +1255,9 @@ export class TypeOrmCrudService<T> extends CrudService<T, DeepPartial<T>> {
   }
 
   protected getColumnType(field: string): ColumnType {
-    const column = this.repo.metadata.ownColumns.find((col) => col.propertyName === field);
+    const column = this.repo.metadata.ownColumns.find(
+      (col) => col.propertyName === field,
+    );
     return column.type;
   }
 }

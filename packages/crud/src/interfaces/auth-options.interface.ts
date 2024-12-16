@@ -1,6 +1,6 @@
-import { SCondition } from '@dataui/crud-request/lib/types/request-query.types';
-import { ObjectLiteral } from '@dataui/crud-util';
-import { ClassTransformOptions } from 'class-transformer';
+import type { SCondition } from '@n4it/crud-request/lib/types/request-query.types';
+import type { ObjectLiteral } from '@n4it/crud-util';
+import type { ClassTransformOptions } from 'class-transformer';
 
 export interface AuthGlobalOptions {
   property?: string;

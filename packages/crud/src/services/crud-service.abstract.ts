@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { ParsedRequestParams } from '@dataui/crud-request';
-import { objKeys } from '@dataui/crud-util';
+import { ParsedRequestParams } from '@n4it/crud-request';
+import { objKeys } from '@n4it/crud-util';
 
 import {
   CreateManyDto,
@@ -106,8 +106,8 @@ export abstract class CrudService<T, DTO = T> {
     return query.page && take
       ? take * (query.page - 1)
       : query.offset
-      ? query.offset
-      : null;
+        ? query.offset
+        : null;
   }
 
   /**

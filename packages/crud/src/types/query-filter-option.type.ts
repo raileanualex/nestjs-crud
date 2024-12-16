@@ -1,7 +1,7 @@
 import {
   QueryFilter,
   SCondition,
-} from '@dataui/crud-request/lib/types/request-query.types';
+} from '@n4it/crud-request/lib/types/request-query.types';
 
 export type QueryFilterFunction = (
   search?: SCondition,

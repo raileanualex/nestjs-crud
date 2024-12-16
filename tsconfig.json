@@ -8,21 +8,21 @@
     "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es2018",
+    "target": "ES2022",
     "sourceMap": true,
     "allowJs": false,
     "skipLibCheck": false,
     "composite": true,
     "baseUrl": "./packages",
     "paths": {
-      "@dataui/crud": ["crud/src"],
-      "@dataui/crud-typeorm": ["crud-typeorm/src"],
-      "@dataui/crud-request": ["crud-request/src"],
-      "@dataui/crud-util": ["crud-util/src"],
-      "@dataui/crud/*": ["crud/src/*"],
-      "@dataui/crud-typeorm/*": ["crud-typeorm/src/*"],
-      "@dataui/crud-request/*": ["crud-request/src/*"],
-      "@dataui/crud-util/*": ["crud-util/src/*"]
+      "@n4it/crud": ["crud/src"],
+      "@n4it/crud-typeorm": ["crud-typeorm/src"],
+      "@n4it/crud-request": ["crud-request/src"],
+      "@n4it/crud-util": ["crud-util/src"],
+      "@n4it/crud/*": ["crud/src/*"],
+      "@n4it/crud-typeorm/*": ["crud-typeorm/src/*"],
+      "@n4it/crud-request/*": ["crud-request/src/*"],
+      "@n4it/crud-util/*": ["crud-util/src/*"]
     }
   },
   "references": [

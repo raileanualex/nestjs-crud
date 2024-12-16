@@ -1,7 +1,7 @@
 {
-  "name": "@dataui/crud-util",
+  "name": "@n4it/crud-util",
   "description": "NestJs CRUD for RESTful APIs - util",
-  "version": "5.3.4",
+  "version": "0.0.0",
   "license": "MIT",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -14,10 +14,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/gid-oss/dataui-nestjs-crud"
+    "url": "https://github.com/nest4it/nestjs-crud"
   },
   "bugs": {
-    "url": "https://github.com/gid-oss/dataui-nestjs-crud/issues"
+    "url": "https://github.com/nest4it/nestjs-crud/issues"
   },
   "keywords": [
     "typescript",
@@ -31,11 +31,10 @@
     "crud-generator"
   ],
   "author": {
-    "name": "Michael Yali",
-    "email": "mihon4ik@gmail.com"
+    "name": "n4it",
+    "email": "hello@n4it.nl"
   },
   "scripts": {
     "build": "npx tsc -b"
-  },
-  "gitHead": "d9e468bd6e47762cf0de415d049f56078195ddb3"
+  }
 }

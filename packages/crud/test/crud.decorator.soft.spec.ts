@@ -39,9 +39,7 @@ describe('#crud', () => {
 
     describe('#recoverOneBase', () => {
       it('should return status 404 if controller does not have soft delete', () => {
-        return request(server)
-          .patch('/test/1/recover')
-          .expect(404);
+        return request(server).patch('/test/1/recover').expect(404);
       });
     });
   });
@@ -79,9 +77,7 @@ describe('#crud', () => {
 
     describe('#recoverOneBase', () => {
       it('should return status 200 if controller has soft delete', () => {
-        return request(server)
-          .patch('/test/1/recover')
-          .expect(200);
+        return request(server).patch('/test/1/recover').expect(200);
       });
     });
   });
