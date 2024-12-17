@@ -168,7 +168,7 @@ describe('#crud', () => {
     constructor(public service: TestService<TestModel>) {}
   }
 
-  let $: supertest.SuperTest<supertest.Test>;
+  let $: ReturnType<typeof supertest>;
   let app: NestApplication;
 
   beforeAll(async () => {

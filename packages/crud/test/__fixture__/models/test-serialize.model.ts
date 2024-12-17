@@ -1,8 +1,8 @@
 export class TestSerializeModel {
-  id: number;
-  name: string;
-  email: string;
-  isActive: boolean;
+  declare id: number;
+  declare name: string;
+  declare email: string;
+  declare isActive: boolean;
 
   constructor(partial: Partial<TestSerializeModel>) {
     Object.assign(this, partial);

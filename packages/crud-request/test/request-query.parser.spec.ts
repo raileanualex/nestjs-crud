@@ -1,4 +1,3 @@
-import 'jest-extended';
 import { RequestQueryException } from '../src/exceptions/request-query.exception';
 import { ParamsOptions, ParsedRequestParams } from '../src/interfaces';
 import { RequestQueryParser } from '../src/request-query.parser';

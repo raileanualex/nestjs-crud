@@ -3,8 +3,9 @@ import { Test } from '@nestjs/testing';
 import { Controller, INestApplication } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { RequestQueryBuilder } from '@n4it/crud-request';
+import { ParsedBody, ParsedRequest } from '../src';
 
-import { Crud, Override, ParsedRequest, ParsedBody } from '../src/decorators';
+import { Crud, Override } from '../src/decorators';
 import { CrudController, CrudRequest, CreateManyDto } from '../src/interfaces';
 import { R, Swagger } from '../src/crud';
 import { CrudActions } from '../src/enums';
@@ -80,27 +81,21 @@ describe('#crud', () => {
     });
 
     describe('#override getMany', () => {
-      it('should return status 200', (done) => {
-        return request(server)
+      it('should return status 200', async () => {
+        const res = await request(server)
           .get('/test')
           .expect(200)
-          .end((_, res) => {
-            const expected = { foo: 'bar' };
-            expect(res.body).toMatchObject(expected);
-            done();
-          });
+          const expected = { foo: 'bar' };
+          expect(res.body).toMatchObject(expected);
       });
-      it('should return status 400', (done) => {
+      it('should return status 400', async () => {
         const query = qb.setFilter({ field: 'foo', operator: 'gt' }).query();
-        return request(server)
+        const res = await request(server)
           .get('/test')
           .query(query)
-          .end((_, res) => {
-            const expected = { statusCode: 400, message: 'Invalid filter value' };
-            expect(res.status).toEqual(400);
-            expect(res.body).toMatchObject(expected);
-            done();
-          });
+          const expected = { statusCode: 400, message: 'Invalid filter value' };
+          expect(res.status).toEqual(400);
+          expect(res.body).toMatchObject(expected);
       });
       it('should have action metadata', () => {
         const action = R.getAction(TestController.prototype.getMany);
@@ -145,19 +140,16 @@ describe('#crud', () => {
     });
 
     describe('#override createMany', () => {
-      it('should still validate dto', (done) => {
+      it('should still validate dto', async () => {
         const send: CreateManyDto<TestModel> = {
           bulk: [],
         };
-        return request(server)
+        const res = await request(server)
           .post('/test/bulk')
           .send(send)
-          .end((_, res) => {
-            expect(res.status).toEqual(400);
-            done();
-          });
+          expect(res.status).toEqual(400);
       });
-      it('should return status 201', (done) => {
+      it('should return status 201', async () => {
         const send: CreateManyDto<TestModel> = {
           bulk: [
             {
@@ -174,16 +166,13 @@ describe('#crud', () => {
             },
           ],
         };
-        return request(server)
+        const res = await request(server)
           .post('/test/bulk')
           .send(send)
           .expect(201)
-          .end((_, res) => {
-            expect(res.body).toHaveProperty('req');
-            expect(res.body).toHaveProperty('dto');
-            expect(res.body.dto).toMatchObject(send);
-            done();
-          });
+          expect(res.body).toHaveProperty('req');
+          expect(res.body).toHaveProperty('dto');
+          expect(res.body.dto).toMatchObject(send);
       });
     });
   });

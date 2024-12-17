@@ -9,7 +9,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Crud, CrudAuth } from '@n4it/crud';
+import { Crud, CrudAuth } from '../../crud/src';
 import * as request from 'supertest';
 import { withCache } from '../../../integration/crud-typeorm/orm.config';
 import { User } from '../../../integration/crud-typeorm/users';
@@ -23,7 +23,7 @@ describe('#crud-typeorm', () => {
   describe('#CrudAuth', () => {
     const USER_REQUEST_KEY = 'user';
     let app: INestApplication;
-    let server: request.SuperTest<request.Test>;
+    let server: ReturnType<typeof request>;
 
     @Injectable()
     class AuthGuard implements CanActivate {

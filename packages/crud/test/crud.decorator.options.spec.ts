@@ -5,7 +5,6 @@ import { APP_FILTER } from '@nestjs/core';
 import { CrudRoutesFactory } from '../src/crud/crud-routes.factory';
 import { Swagger } from '../src/crud/swagger.helper';
 import { Crud } from '../src/decorators';
-import { CrudOptions } from '../src/interfaces';
 import { BaseRouteName } from '../src/types';
 import { HttpExceptionFilter } from './__fixture__/exception.filter';
 import { TestModel } from './__fixture__/models';
@@ -24,7 +23,7 @@ describe('#crud', () => {
       }
     }
 
-    const options: CrudOptions = {
+    const options = {
       model: { type: TestModel },
       params: {
         id: {
@@ -72,7 +71,7 @@ describe('#crud', () => {
       routesFactory: CustomSwaggerRoutesFactory,
     };
 
-    @Crud(options)
+    @Crud(options as any)
     @Controller('test')
     class TestController {
       constructor(public service: TestService<TestModel>) {}
@@ -94,17 +93,14 @@ describe('#crud', () => {
       app.close();
     });
 
-    it('should return options in ParsedRequest', (done) => {
-      return request(server)
+    it('should return options in ParsedRequest', async () => {
+      const res = await request(server)
         .get('/test')
         .expect(200)
-        .end((_, res) => {
-          const opt = res.body.req.options;
-          expect(opt.query).toMatchObject(options.query);
-          expect(opt.routes).toMatchObject(options.routes);
-          expect(opt.params).toMatchObject(options.params);
-          done();
-        });
+        const opt = res.body.req.options;
+        expect(opt.query).toMatchObject(options.query);
+        expect(opt.routes).toMatchObject(options.routes);
+        expect(opt.params).toMatchObject(options.params);
     });
 
     it('should use crudRoutesFactory override', () => {

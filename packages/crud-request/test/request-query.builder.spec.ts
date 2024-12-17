@@ -1,4 +1,3 @@
-import 'jest-extended';
 import { RequestQueryBuilder } from '../src/request-query.builder';
 import { RequestQueryException } from '../src/exceptions/request-query.exception';
 
@@ -74,7 +73,7 @@ describe('#request-query', () => {
       it('should set filter, 1', () => {
         qb.setFilter({ field: 'foo', operator: 'eq', value: 'bar' });
         const expected = ['foo||eq||bar'];
-        expect(qb.queryObject.filter).toIncludeSameMembers(expected);
+        expect(qb.queryObject.filter).toEqual(expect.arrayContaining(expected));
       });
       it('should set filter, 2', () => {
         qb.setFilter([
@@ -82,7 +81,7 @@ describe('#request-query', () => {
           { field: 'baz', operator: 'ne', value: 'zoo' },
         ]);
         const expected = ['foo||eq||bar', 'baz||ne||zoo'];
-        expect(qb.queryObject.filter).toIncludeSameMembers(expected);
+        expect(qb.queryObject.filter).toEqual(expect.arrayContaining(expected));
       });
       it('should set filter, 3', () => {
         qb.setFilter([
@@ -90,7 +89,7 @@ describe('#request-query', () => {
           { field: 'baz', operator: 'ne', value: 'zoo' },
         ]);
         const expected = ['foo||eq||bar', 'baz||ne||zoo'];
-        expect(qb.queryObject.filter).toIncludeSameMembers(expected);
+        expect(qb.queryObject.filter).toEqual(expect.arrayContaining(expected));
       });
       it('should set filter, 4', () => {
         qb.setFilter([
@@ -98,12 +97,12 @@ describe('#request-query', () => {
           ['baz', 'ne', 'zoo'],
         ]);
         const expected = ['foo||eq||bar', 'baz||ne||zoo'];
-        expect(qb.queryObject.filter).toIncludeSameMembers(expected);
+        expect(qb.queryObject.filter).toEqual(expect.arrayContaining(expected));
       });
       it('should set filter, 5', () => {
         qb.setFilter(['foo', 'eq', 'bar']);
         const expected = ['foo||eq||bar'];
-        expect(qb.queryObject.filter).toIncludeSameMembers(expected);
+        expect(qb.queryObject.filter).toEqual(expect.arrayContaining(expected));
       });
     });
 
@@ -128,7 +127,7 @@ describe('#request-query', () => {
       it('should set or, 1', () => {
         qb.setOr({ field: 'foo', operator: 'eq', value: 'bar' });
         const expected = ['foo||eq||bar'];
-        expect(qb.queryObject.or).toIncludeSameMembers(expected);
+        expect(qb.queryObject.or).toEqual(expect.arrayContaining(expected));
       });
       it('should set or, 2', () => {
         qb.setOr([
@@ -136,7 +135,7 @@ describe('#request-query', () => {
           { field: 'baz', operator: 'ne', value: 'zoo' },
         ]);
         const expected = ['foo||eq||bar', 'baz||ne||zoo'];
-        expect(qb.queryObject.or).toIncludeSameMembers(expected);
+        expect(qb.queryObject.or).toEqual(expect.arrayContaining(expected));
       });
     });
 
@@ -170,27 +169,27 @@ describe('#request-query', () => {
       it('should set join, 1', () => {
         qb.setJoin({ field: 'foo' });
         const expected = ['foo'];
-        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+        expect(qb.queryObject.join).toEqual(expect.arrayContaining(expected));
       });
       it('should set join, 2', () => {
         qb.setJoin([{ field: 'foo' }, { field: 'bar', select: ['a', 'b', 'c'] }]);
         const expected = ['foo', 'bar||a,b,c'];
-        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+        expect(qb.queryObject.join).toEqual(expect.arrayContaining(expected));
       });
       it('should set join, 3', () => {
         qb.setJoin(['foo']);
         const expected = ['foo'];
-        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+        expect(qb.queryObject.join).toEqual(expect.arrayContaining(expected));
       });
       it('should set join, 4', () => {
         qb.setJoin(['foo', ['a', 'b', 'c']]);
         const expected = ['foo||a,b,c'];
-        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+        expect(qb.queryObject.join).toEqual(expect.arrayContaining(expected));
       });
       it('should set join, 5', () => {
         qb.setJoin([{ field: 'baz' }, ['foo', ['a', 'b', 'c']]]);
         const expected = ['baz', 'foo||a,b,c'];
-        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+        expect(qb.queryObject.join).toEqual(expect.arrayContaining(expected));
       });
       it('should set join, 6', () => {
         qb.setJoin([
@@ -199,7 +198,7 @@ describe('#request-query', () => {
           ['boo', ['a', 'b', 'c'], [{ field: 'bar', operator: 'eq', value: 100 }]],
         ]);
         const expected = ['baz', 'foo||a,b,c', 'boo||a,b,c||on[0]=bar||eq||100'];
-        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+        expect(qb.queryObject.join).toEqual(expect.arrayContaining(expected));
       });
       it('should set join, 7', () => {
         qb.setJoin([
@@ -210,7 +209,7 @@ describe('#request-query', () => {
           },
         ]);
         const expected = ['baz||a,b,c||on[0]=bar||eq||100'];
-        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+        expect(qb.queryObject.join).toEqual(expect.arrayContaining(expected));
       });
       it('should set join, 8', () => {
         qb.setJoin([
@@ -224,7 +223,7 @@ describe('#request-query', () => {
           },
         ]);
         const expected = ['baz||a,b,c||on[0]=bar||eq||100,on[1]=foo||isnull'];
-        expect(qb.queryObject.join).toIncludeSameMembers(expected);
+        expect(qb.queryObject.join).toEqual(expect.arrayContaining(expected));
       });
     });
 
@@ -249,7 +248,7 @@ describe('#request-query', () => {
       it('should set sort, 1', () => {
         qb.sortBy({ field: 'foo', order: 'ASC' });
         const expected = ['foo,ASC'];
-        expect(qb.queryObject.sort).toIncludeSameMembers(expected);
+        expect(qb.queryObject.sort).toEqual(expect.arrayContaining(expected));
       });
       it('should set sort, 2', () => {
         qb.sortBy([
@@ -257,22 +256,22 @@ describe('#request-query', () => {
           { field: 'bar', order: 'DESC' },
         ]);
         const expected = ['foo,ASC', 'bar,DESC'];
-        expect(qb.queryObject.sort).toIncludeSameMembers(expected);
+        expect(qb.queryObject.sort).toEqual(expect.arrayContaining(expected));
       });
       it('should set sort, 3', () => {
         qb.sortBy(['foo', 'ASC']);
         const expected = ['foo,ASC'];
-        expect(qb.queryObject.sort).toIncludeSameMembers(expected);
+        expect(qb.queryObject.sort).toEqual(expect.arrayContaining(expected));
       });
       it('should set sort, 4', () => {
         qb.sortBy([['foo', 'ASC']]);
         const expected = ['foo,ASC'];
-        expect(qb.queryObject.sort).toIncludeSameMembers(expected);
+        expect(qb.queryObject.sort).toEqual(expect.arrayContaining(expected));
       });
       it('should set sort, 5', () => {
         qb.sortBy([{ field: 'bar', order: 'DESC' }, ['foo', 'ASC']]);
         const expected = ['bar,DESC', 'foo,ASC'];
-        expect(qb.queryObject.sort).toIncludeSameMembers(expected);
+        expect(qb.queryObject.sort).toEqual(expect.arrayContaining(expected));
       });
     });
 

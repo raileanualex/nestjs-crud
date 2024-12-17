@@ -3,13 +3,12 @@ import { Test } from '@nestjs/testing';
 import { Controller, INestApplication } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 
-import { CrudGlobalConfig } from '../src/interfaces';
 import { CrudConfigService } from '../src/module/crud-config.service';
 
 // IMPORTANT:
 // CrudConfigService.load() should be called before importing @Crud() controllers
 
-const conf: CrudGlobalConfig = {
+const conf = {
   query: {
     limit: 10,
   },
@@ -35,8 +34,7 @@ const conf: CrudGlobalConfig = {
 };
 
 // Important: load config before (!!!) you import AppModule
-// https://github.com/dataui/crud/wiki/Controllers#global-options
-CrudConfigService.load(conf);
+CrudConfigService.load(conf as any);
 
 import { Crud } from '../src/decorators/crud.decorator';
 import { HttpExceptionFilter } from './__fixture__/exception.filter';
@@ -101,10 +99,10 @@ describe('#crud', () => {
       app.close();
     });
 
-    it('should use global config', (done) => {
-      return request(server)
+    it('should use global config', async () => {
+      const res = await request(server)
         .get('/test')
-        .end((_, res) => {
+
           expect(res.status).toBe(200);
           expect(res.body.req.options.query).toMatchObject(conf.query);
           expect(res.body.req.options.params).toMatchObject(conf.params);
@@ -114,13 +112,10 @@ describe('#crud', () => {
           expect(res.body.req.options.routes.replaceOneBase.allowParamsOverride).toBe(
             true,
           );
-          done();
-        });
     });
-    it('should use merged config', (done) => {
-      return request(server)
+    it('should use merged config', async () => {
+      const res = await request(server)
         .get('/test2')
-        .end((_, res) => {
           expect(res.status).toBe(200);
           expect(res.body.req.options.query).toMatchObject({
             limit: 12,
@@ -139,26 +134,18 @@ describe('#crud', () => {
             false,
           );
           expect(res.body.req.options.routes.deleteOneBase.returnDeleted).toBe(true);
-          done();
-        });
     });
-    it('should exclude route, 1', (done) => {
-      return request(server)
+    it('should exclude route, 1', async () => {
+      const res = await request(server)
         .post('/test/bulk')
         .send({})
-        .end((_, res) => {
-          expect(res.status).toBe(404);
-          done();
-        });
+        expect(res.status).toBe(404);
     });
-    it('should exclude route, 1', (done) => {
-      return request(server)
+    it('should exclude route, 1', async () => {
+      const res = await request(server)
         .post('/test2/bulk')
         .send({})
-        .end((_, res) => {
-          expect(res.status).toBe(404);
-          done();
-        });
+        expect(res.status).toBe(404);
     });
   });
 });

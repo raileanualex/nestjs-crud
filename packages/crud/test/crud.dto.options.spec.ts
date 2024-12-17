@@ -45,33 +45,30 @@ describe('#crud', () => {
     });
 
     describe('#createOneBase', () => {
-      it('should return status 201', () => {
+      it('should return status 201', async () => {
         const send: TestCreateDto = {
           firstName: 'firstName',
           lastName: 'lastName',
           email: 'test@test.com',
           age: 15,
         };
-        return request(server).post('/test').send(send).expect(201);
+        await request(server).post('/test').send(send).expect(201);
       });
-      it('should return status 400', (done) => {
+      it('should return status 400', async () => {
         const send: TestModel = {
           firstName: 'firstName',
           lastName: 'lastName',
           email: 'test@test.com',
         };
-        return request(server)
+        const res = await request(server)
           .post('/test')
           .send(send)
-          .end((_, res) => {
-            expect(res.status).toEqual(400);
-            done();
-          });
+          expect(res.status).toEqual(400);
       });
     });
 
     describe('#updateOneBase', () => {
-      it('should return status 200', () => {
+      it('should return status 200', async () => {
         const send: TestModel = {
           id: 1,
           firstName: 'firstName',
@@ -79,21 +76,18 @@ describe('#crud', () => {
           email: 'test@test.com',
           age: 15,
         };
-        return request(server).patch('/test/1').send(send).expect(200);
+        await request(server).patch('/test/1').send(send).expect(200);
       });
-      it('should return status 400', (done) => {
+      it('should return status 400', async () => {
         const send: TestModel = {
           firstName: 'firstName',
           lastName: 'lastName',
           email: 'foo',
         };
-        return request(server)
+        const res = await request(server)
           .patch('/test/1')
           .send(send)
-          .end((_, res) => {
-            expect(res.status).toEqual(400);
-            done();
-          });
+          expect(res.status).toEqual(400);
       });
     });
   });

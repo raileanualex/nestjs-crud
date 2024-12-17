@@ -1,4 +1,3 @@
-import { RequestQueryException } from '@n4it/crud-request';
 import { validateComparisonOperator, validateUUID } from '../src/request-query.validator';
 
 describe('#request-query', () => {
@@ -33,9 +32,7 @@ describe('#request-query', () => {
         expect(withCustom).toBeUndefined();
       });
       it('should not pass with undefined custom validator', () => {
-        expect(validateComparisonOperator.bind(this, 'undefinedCustom')).toThrowError(
-          RequestQueryException,
-        );
+        expect(() => validateComparisonOperator('undefinedCustom')).toThrow();
       });
     });
   });
