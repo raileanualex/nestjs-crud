@@ -38,5 +38,8 @@
   },
   "scripts": {
     "build": "npx tsc -b"
+  },
+  "devDependencies": {
+    "@n4it/crud": "^0.0.0"
   }
 }

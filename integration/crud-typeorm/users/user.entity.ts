@@ -39,7 +39,6 @@ export class Name {
   last: string;
 }
 
-// tslint:disable-next-line:max-classes-per-file
 @Entity('users')
 export class User extends BaseEntity {
   @IsOptional({ groups: [UPDATE] })
@@ -47,7 +46,7 @@ export class User extends BaseEntity {
   @IsString({ always: true })
   @MaxLength(255, { always: true })
   @IsEmail({ require_tld: false }, { always: true })
-  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   email: string;
 
   @IsOptional({ groups: [UPDATE] })
@@ -56,8 +55,8 @@ export class User extends BaseEntity {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
-  @Type((t) => Name)
-  @Column((type) => Name)
+  @Type(() => Name)
+  @Column(() => Name)
   name: Name;
 
   @Column({ nullable: true })
@@ -76,25 +75,25 @@ export class User extends BaseEntity {
   @IsOptional({ groups: [UPDATE] })
   @IsNotEmpty({ groups: [CREATE] })
   @ValidateNested({ always: true })
-  @Type((t) => UserProfile)
-  @OneToOne((type) => UserProfile, (p) => p.user, { cascade: true })
+  @Type(() => UserProfile)
+  @OneToOne(() => UserProfile, (p) => p.user, { cascade: true })
   @JoinColumn()
   profile?: UserProfile;
 
-  @ManyToOne((type) => Company, (c) => c.users)
+  @ManyToOne(() => Company, (c) => c.users)
   company?: Company;
 
-  @ManyToMany((type) => Project, (c) => c.users)
+  @ManyToMany(() => Project, (c) => c.users)
   projects?: Project[];
 
-  @OneToMany((type) => UserProject, (el) => el.user, {
+  @OneToMany(() => UserProject, (el) => el.user, {
     persistence: false,
     onDelete: 'CASCADE',
   })
   userProjects?: UserProject[];
 
-  @OneToMany((type) => UserLicense, (ul) => ul.user)
-  @Type((t) => UserLicense)
+  @OneToMany(() => UserLicense, (ul) => ul.user)
+  @Type(() => UserLicense)
   @JoinColumn()
   userLicenses?: UserLicense[];
 }

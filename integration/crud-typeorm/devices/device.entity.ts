@@ -1,8 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
-import { CrudValidationGroups } from '@n4it/crud';
-
-const { CREATE, UPDATE } = CrudValidationGroups;
 
 @Entity('devices')
 export class Device {

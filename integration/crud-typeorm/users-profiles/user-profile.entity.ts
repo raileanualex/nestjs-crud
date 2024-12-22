@@ -19,6 +19,6 @@ export class UserProfile extends BaseEntity {
    * Relations
    */
 
-  @OneToOne((type) => User, (u) => u.profile)
+  @OneToOne(() => User, (u) => u.profile)
   user?: User;
 }

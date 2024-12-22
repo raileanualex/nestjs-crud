@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, INestApplication } from '@nestjs/common';
+import { Controller, INestApplication } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,20 +7,21 @@ import * as request from 'supertest';
 
 import { Company } from '../../../integration/crud-typeorm/companies';
 import { Note } from '../../../integration/crud-typeorm/notes';
-import { withCache } from '../../../integration/crud-typeorm/orm.config';
+import { isPg, postgresConfig, mySqlConfig } from '../../../database';
 import { Project } from '../../../integration/crud-typeorm/projects';
 import { User } from '../../../integration/crud-typeorm/users';
 import { UserProfile } from '../../../integration/crud-typeorm/users-profiles';
 import { HttpExceptionFilter } from '../../../integration/shared/https-exception.filter';
-import { Crud } from '../../crud/src/decorators';
+import { Crud } from '@n4it/crud';
 import { CompaniesService } from './__fixture__/companies.service';
 import { NotesService } from './__fixture__/notes.service';
 import { ProjectsService } from './__fixture__/projects.service';
 import { UsersService, UsersService2 } from './__fixture__/users.service';
 import { UserProfilesService } from './__fixture__/UserProfile.service';
 
-// tslint:disable:max-classes-per-file
 describe('#crud-typeorm', () => {
+  const withCache = isPg ? postgresConfig : mySqlConfig;
+
   describe('#query params', () => {
     let app: INestApplication;
     let server: any;
@@ -233,30 +234,24 @@ describe('#crud-typeorm', () => {
     describe('#select', () => {
       it('should throw status 400', async () => {
         const query = qb.setFilter({ field: 'invalid', operator: 'isnull' }).query();
-        const res = await request(server)
-          .get('/companies')
-          .query(query)
-          expect(res.status).toBe(500);
+        const res = await request(server).get('/companies').query(query);
+        expect(res.status).toBe(500);
       });
     });
 
     describe('#query filter', () => {
       it('should return data with limit', async () => {
         const query = qb.setLimit(4).query();
-        const res = await request(server)
-          .get('/companies')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.length).toBe(4);
-          res.body.forEach((e: Company) => {
-            expect(e.id).not.toBe(1);
-          });
+        const res = await request(server).get('/companies').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(4);
+        res.body.forEach((e: Company) => {
+          expect(e.id).not.toBe(1);
+        });
       });
       it('should return with maxLimit', async () => {
         const query = qb.setLimit(7).query();
-        const res = await request(server)
-          .get('/companies')
-          .query(query)
+        const res = await request(server).get('/companies').query(query);
         expect(res.status).toBe(200);
         expect(res.body.length).toBe(5);
       });
@@ -265,11 +260,9 @@ describe('#crud-typeorm', () => {
           .setFilter({ field: 'name', operator: 'notin', value: ['Name2', 'Name3'] })
           .setOr({ field: 'domain', operator: 'cont', value: 5 })
           .query();
-        const res = await request(server)
-          .get('/companies')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.length).toBe(5);
+        const res = await request(server).get('/companies').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(5);
       });
       it('should return with filter and or, 2', async () => {
         const query = qb
@@ -277,11 +270,9 @@ describe('#crud-typeorm', () => {
           .setOr({ field: 'name', operator: 'starts', value: 'P' })
           .setOr({ field: 'isActive', operator: 'eq', value: true })
           .query();
-        const res = await request(server)
-          .get('/projects')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.length).toBe(10);
+        const res = await request(server).get('/projects').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(10);
       });
       it('should return with filter and or, 3', async () => {
         const query = qb
@@ -289,11 +280,9 @@ describe('#crud-typeorm', () => {
           .setFilter({ field: 'companyId', operator: 'gte', value: 6 })
           .setFilter({ field: 'companyId', operator: 'lt', value: 10 })
           .query();
-        const res = await request(server)
-          .get('/projects')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.length).toBe(8);
+        const res = await request(server).get('/projects').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(8);
       });
       it('should return with filter and or, 4', async () => {
         const query = qb
@@ -302,57 +291,45 @@ describe('#crud-typeorm', () => {
           .setFilter({ field: 'isActive', operator: 'eq', value: false })
           .setFilter({ field: 'description', operator: 'notnull' })
           .query();
-        const res = await request(server)
-          .get('/projects')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.length).toBe(10);
+        const res = await request(server).get('/projects').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(10);
       });
       it('should return with filter and or, 5', async () => {
         const query = qb.setOr({ field: 'companyId', operator: 'isnull' }).query();
-        const res = await request(server)
-          .get('/projects')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.length).toBe(0);
+        const res = await request(server).get('/projects').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(0);
       });
       it('should return with filter and or, 6', async () => {
         const query = qb
           .setOr({ field: 'companyId', operator: 'between', value: [1, 5] })
           .query();
-        const res = await request(server)
-          .get('/projects')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.length).toBe(10);
+        const res = await request(server).get('/projects').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(10);
       });
       it('should return with filter, 1', async () => {
         const query = qb.setOr({ field: 'companyId', operator: 'eq', value: 1 }).query();
-        const res = await request(server)
-          .get('/projects')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.length).toBe(2);
+        const res = await request(server).get('/projects').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(2);
       });
     });
 
     describe('#query join', () => {
       it('should return joined entity, 1', async () => {
         const query = qb.setJoin({ field: 'company', select: ['name'] }).query();
-        const res = await request(server)
-          .get('/projects/2')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.company).toBeDefined();
+        const res = await request(server).get('/projects/2').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.company).toBeDefined();
       });
       it('should return joined entity, 2', async () => {
         const query = qb.setJoin({ field: 'users', select: ['name'] }).query();
-        const res = await request(server)
-          .get('/companies/2')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.users).toBeDefined();
-          expect(res.body.users.length).not.toBe(0);
+        const res = await request(server).get('/companies/2').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.users).toBeDefined();
+        expect(res.body.users.length).not.toBe(0);
       });
       it('should return joined entity, 3', async () => {
         const query = qb
@@ -362,21 +339,17 @@ describe('#crud-typeorm', () => {
             on: [{ field: 'user.id', operator: '$eq', value: 1 }],
           })
           .query();
-        const res = await request(server)
-          .get('/profiles')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.length).not.toBe(0);
-          expect(res.body[0].user).toBeDefined();
+        const res = await request(server).get('/profiles').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.length).not.toBe(0);
+        expect(res.body[0].user).toBeDefined();
       });
       it('should eager join without selection', async () => {
         const query = qb.search({ 'userCompany.id': { $eq: 1 } }).query();
-        const res = await request(server)
-          .get('/myusers')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.length).toBe(10);
-          expect(res.body[0].company).toBeUndefined();
+        const res = await request(server).get('/myusers').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(10);
+        expect(res.body[0].company).toBeUndefined();
       });
     });
 
@@ -391,10 +364,8 @@ describe('#crud-typeorm', () => {
             value: 'invalid',
           })
           .query();
-        const res = await request(server)
-          .get('/users/1')
-          .query(query)
-          expect(res.status).toBe(500);
+        const res = await request(server).get('/users/1').query(query);
+        expect(res.status).toBe(500);
       });
       it('should return status 400, 2', async () => {
         const query = qb
@@ -406,10 +377,8 @@ describe('#crud-typeorm', () => {
             value: 'invalid',
           })
           .query();
-        const res = await request(server)
-          .get('/users/1')
-          .query(query)
-          expect(res.status).toBe(500);
+        const res = await request(server).get('/users/1').query(query);
+        expect(res.status).toBe(500);
       });
       it('should return status 400, 3', async () => {
         const query = qb
@@ -421,20 +390,16 @@ describe('#crud-typeorm', () => {
             value: 'invalid',
           })
           .query();
-        const res = await request(server)
-          .get('/users/1')
-          .query(query)
-          expect(res.status).toBe(500);
+        const res = await request(server).get('/users/1').query(query);
+        expect(res.status).toBe(500);
       });
       it('should return status 200', async () => {
         const query = qb
           .setJoin({ field: 'company' })
           .setJoin({ field: 'company.projectsinvalid' })
           .query();
-        const res = await request(server)
-          .get('/users/1')
-          .query(query)
-          expect(res.status).toBe(200);
+        const res = await request(server).get('/users/1').query(query);
+        expect(res.status).toBe(200);
       });
       it('should return joined entity, 1', async () => {
         const query = qb
@@ -442,12 +407,10 @@ describe('#crud-typeorm', () => {
           .setJoin({ field: 'company' })
           .setJoin({ field: 'company.projects' })
           .query();
-        const res = await request(server)
-          .get('/users/1')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.company).toBeDefined();
-          expect(res.body.company.projects).toBeDefined();
+        const res = await request(server).get('/users/1').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.company).toBeDefined();
+        expect(res.body.company.projects).toBeDefined();
       });
       it('should return joined entity, 2', async () => {
         const query = qb
@@ -455,12 +418,10 @@ describe('#crud-typeorm', () => {
           .setJoin({ field: 'company' })
           .setJoin({ field: 'company.projects' })
           .query();
-        const res = await request(server)
-          .get('/users/1')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.company).toBeDefined();
-          expect(res.body.company.projects).toBeDefined();
+        const res = await request(server).get('/users/1').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.company).toBeDefined();
+        expect(res.body.company.projects).toBeDefined();
       });
       it('should return joined entity with alias', async () => {
         const query = qb
@@ -468,39 +429,33 @@ describe('#crud-typeorm', () => {
           .setJoin({ field: 'company' })
           .setJoin({ field: 'company.projects' })
           .query();
-        const res = await request(server)
-          .get('/users2/1')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.company).toBeDefined();
-          expect(res.body.company.projects).toBeDefined();
+        const res = await request(server).get('/users2/1').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.company).toBeDefined();
+        expect(res.body.company.projects).toBeDefined();
       });
       it('should return joined entity with ManyToMany pivot table', async () => {
         const query = qb
           .setJoin({ field: 'users' })
           .setJoin({ field: 'userProjects' })
           .query();
-        const res = await request(server)
-          .get('/projects/1')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.users).toBeDefined();
-          expect(res.body.users.length).toBe(2);
-          expect(res.body.users[0].id).toBe(1);
-          expect(res.body.userProjects).toBeDefined();
-          expect(res.body.userProjects.length).toBe(2);
-          expect(res.body.userProjects[0].review).toBe('User project 1 1');
+        const res = await request(server).get('/projects/1').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.users).toBeDefined();
+        expect(res.body.users.length).toBe(2);
+        expect(res.body.users[0].id).toBe(1);
+        expect(res.body.userProjects).toBeDefined();
+        expect(res.body.userProjects.length).toBe(2);
+        expect(res.body.userProjects[0].review).toBe('User project 1 1');
       });
     });
 
     describe('#query composite key join', () => {
       it('should return joined relation', async () => {
         const query = qb.setJoin({ field: 'userLicenses' }).query();
-        const res = await request(server)
-          .get('/users/1')
-          .query(query)
-          expect(res.status).toBe(200);
-          expect(res.body.userLicenses).toBeDefined();
+        const res = await request(server).get('/users/1').query(query);
+        expect(res.status).toBe(200);
+        expect(res.body.userLicenses).toBeDefined();
       });
     });
 
@@ -561,10 +516,8 @@ describe('#crud-typeorm', () => {
           })
           .query();
 
-        const res = await request(server)
-          .get('/companies')
-          .query(query)
-          expect(res.status).toBe(400);
+        const res = await request(server).get('/companies').query(query);
+        expect(res.status).toBe(400);
       });
     });
 
@@ -814,7 +767,7 @@ describe('#crud-typeorm', () => {
         const query = qb
           .search({ name: { $inexistentOperator: ['project7', 'project8', 'project9'] } })
           .query();
-        const res = projects4().query(query).expect(500);
+        projects4().query(query).expect(500);
       });
       it('should search by display column name, but use dbName in sql query', async () => {
         const query = qb.search({ revisionId: 2 }).query();

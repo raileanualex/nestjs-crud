@@ -60,10 +60,8 @@ describe('#crud', () => {
           lastName: 'lastName',
           email: 'test@test.com',
         };
-        const res = await request(server)
-          .post('/test')
-          .send(send)
-          expect(res.status).toEqual(400);
+        const res = await request(server).post('/test').send(send);
+        expect(res.status).toEqual(400);
       });
     });
 
@@ -84,10 +82,8 @@ describe('#crud', () => {
           lastName: 'lastName',
           email: 'foo',
         };
-        const res = await request(server)
-          .patch('/test/1')
-          .send(send)
-          expect(res.status).toEqual(400);
+        const res = await request(server).patch('/test/1').send(send);
+        expect(res.status).toEqual(400);
       });
     });
   });

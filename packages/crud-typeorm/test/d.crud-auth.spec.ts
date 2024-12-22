@@ -9,9 +9,9 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Crud, CrudAuth } from '../../crud/src';
+import { Crud, CrudAuth } from '@n4it/crud';
 import * as request from 'supertest';
-import { withCache } from '../../../integration/crud-typeorm/orm.config';
+import { isPg, postgresConfig, mySqlConfig } from '../../../database';
 import { User } from '../../../integration/crud-typeorm/users';
 import { UserProfile } from '../../../integration/crud-typeorm/users-profiles';
 import { Project } from '../../../integration/crud-typeorm/projects';
@@ -20,6 +20,8 @@ import { UsersService } from './__fixture__/users.service';
 import { ProjectsService } from './__fixture__/projects.service';
 
 describe('#crud-typeorm', () => {
+  const withCache = isPg ? postgresConfig : mySqlConfig;
+
   describe('#CrudAuth', () => {
     const USER_REQUEST_KEY = 'user';
     let app: INestApplication;
@@ -171,10 +173,10 @@ describe('#crud-typeorm', () => {
 
     describe('#deleteOneBase', () => {
       it('should delete an entity with auth filter', async () => {
-        const res = await server.delete('/projects/21').expect(200);
+        await server.delete('/projects/21').expect(200);
       });
       it('should throw an error with auth filter', async () => {
-        const res = await server.delete('/projects/20').expect(404);
+        await server.delete('/projects/20').expect(404);
       });
     });
   });

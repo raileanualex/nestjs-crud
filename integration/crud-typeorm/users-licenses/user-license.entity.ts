@@ -11,12 +11,12 @@ export class UserLicense {
   @PrimaryColumn()
   licenseId: number;
 
-  @ManyToOne((type) => User)
-  @Type((t) => User)
+  @ManyToOne(() => User)
+  @Type(() => User)
   user: User;
 
-  @ManyToOne((type) => License)
-  @Type((t) => License)
+  @ManyToOne(() => License)
+  @Type(() => License)
   license: License;
 
   @Column()

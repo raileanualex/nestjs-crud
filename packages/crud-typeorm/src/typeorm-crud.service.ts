@@ -9,7 +9,7 @@ import {
   JoinOptions,
   QueryOptions,
 } from '@n4it/crud';
-import {
+import type {
   ComparisonOperator,
   ParsedRequestParams,
   QueryFilter,

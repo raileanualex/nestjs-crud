@@ -50,10 +50,10 @@ export class Company extends BaseEntity {
    * Relations
    */
 
-  @OneToMany((type) => User, (u) => u.company)
-  @Type((t) => User)
+  @OneToMany(() => User, (u) => u.company)
+  @Type(() => User)
   users: User[];
 
-  @OneToMany((type) => Project, (p) => p.company)
+  @OneToMany(() => Project, (p) => p.company)
   projects: Project[];
 }

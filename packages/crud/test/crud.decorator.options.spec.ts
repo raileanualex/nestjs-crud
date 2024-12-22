@@ -94,13 +94,11 @@ describe('#crud', () => {
     });
 
     it('should return options in ParsedRequest', async () => {
-      const res = await request(server)
-        .get('/test')
-        .expect(200)
-        const opt = res.body.req.options;
-        expect(opt.query).toMatchObject(options.query);
-        expect(opt.routes).toMatchObject(options.routes);
-        expect(opt.params).toMatchObject(options.params);
+      const res = await request(server).get('/test').expect(200);
+      const opt = res.body.req.options;
+      expect(opt.query).toMatchObject(options.query);
+      expect(opt.routes).toMatchObject(options.routes);
+      expect(opt.params).toMatchObject(options.params);
     });
 
     it('should use crudRoutesFactory override', () => {

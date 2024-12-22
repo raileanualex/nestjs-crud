@@ -100,52 +100,38 @@ describe('#crud', () => {
     });
 
     it('should use global config', async () => {
-      const res = await request(server)
-        .get('/test')
+      const res = await request(server).get('/test');
 
-          expect(res.status).toBe(200);
-          expect(res.body.req.options.query).toMatchObject(conf.query);
-          expect(res.body.req.options.params).toMatchObject(conf.params);
-          expect(res.body.req.options.routes.updateOneBase.allowParamsOverride).toBe(
-            true,
-          );
-          expect(res.body.req.options.routes.replaceOneBase.allowParamsOverride).toBe(
-            true,
-          );
+      expect(res.status).toBe(200);
+      expect(res.body.req.options.query).toMatchObject(conf.query);
+      expect(res.body.req.options.params).toMatchObject(conf.params);
+      expect(res.body.req.options.routes.updateOneBase.allowParamsOverride).toBe(true);
+      expect(res.body.req.options.routes.replaceOneBase.allowParamsOverride).toBe(true);
     });
     it('should use merged config', async () => {
-      const res = await request(server)
-        .get('/test2')
-          expect(res.status).toBe(200);
-          expect(res.body.req.options.query).toMatchObject({
-            limit: 12,
-          });
-          expect(res.body.req.options.params).toMatchObject({
-            id: {
-              field: 'id',
-              type: 'number',
-              primary: true,
-            },
-          });
-          expect(res.body.req.options.routes.updateOneBase.allowParamsOverride).toBe(
-            false,
-          );
-          expect(res.body.req.options.routes.replaceOneBase.allowParamsOverride).toBe(
-            false,
-          );
-          expect(res.body.req.options.routes.deleteOneBase.returnDeleted).toBe(true);
+      const res = await request(server).get('/test2');
+      expect(res.status).toBe(200);
+      expect(res.body.req.options.query).toMatchObject({
+        limit: 12,
+      });
+      expect(res.body.req.options.params).toMatchObject({
+        id: {
+          field: 'id',
+          type: 'number',
+          primary: true,
+        },
+      });
+      expect(res.body.req.options.routes.updateOneBase.allowParamsOverride).toBe(false);
+      expect(res.body.req.options.routes.replaceOneBase.allowParamsOverride).toBe(false);
+      expect(res.body.req.options.routes.deleteOneBase.returnDeleted).toBe(true);
     });
     it('should exclude route, 1', async () => {
-      const res = await request(server)
-        .post('/test/bulk')
-        .send({})
-        expect(res.status).toBe(404);
+      const res = await request(server).post('/test/bulk').send({});
+      expect(res.status).toBe(404);
     });
     it('should exclude route, 1', async () => {
-      const res = await request(server)
-        .post('/test2/bulk')
-        .send({})
-        expect(res.status).toBe(404);
+      const res = await request(server).post('/test2/bulk').send({});
+      expect(res.status).toBe(404);
     });
   });
 });

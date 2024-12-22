@@ -1,5 +1,5 @@
 {
-  "name": "@n4it/crud",
+  "name": "@n4it/nestjs-crud",
   "version": "0.0.0",
   "description": "Nest CRUD for RESTful APIs",
   "license": "MIT",
@@ -15,7 +15,17 @@
     "clean": "yarn s clean",
     "test": "npx jest --runInBand -c=jest.config.js packages/ --verbose",
     "lint": "eslint \"packages/**/*.ts\" --fix",
-    "pub": "npx lerna publish --force-publish"
+    "pub": "npx lerna publish --force-publish",
+    "db:cli:typeorm": "ts-node -r tsconfig-paths/register node_modules/typeorm/cli.js",
+    "db:sync:typeorm": "npx ts-node -r tsconfig-paths/register -P tsconfig.json ./node_modules/typeorm/cli.js schema:sync",
+    "db:drop:typeorm": "yarn db:cli:typeorm schema:drop",
+    "db:seeds:typeorm": "yarn db:cli:typeorm migration:run",
+    "db:prepare:typeorm": "yarn db:drop:typeorm -d ./database/postgres.datasource && yarn db:sync:typeorm -d ./database/postgres.datasource && yarn db:seeds:typeorm -d ./database/postgres.datasource",
+    "db:prepare:typeorm:mysql": "yarn db:drop:typeorm -d ./database/mysql.datasource && yarn db:sync:typeorm -d ./database/mysql.datasource && yarn db:seeds:typeorm -d ./database/mysql.datasource",
+    "test:all": "yarn test:mysql && yarn test:postgres",
+    "test:coverage": "yarn test:all --coverage",
+    "test:postgres": "yarn db:prepare:typeorm && yarn test",
+    "test:mysql": "yarn db:prepare:typeorm:mysql && TYPEORM_CONNECTION=mysql yarn test"
   },
   "dependencies": {},
   "devDependencies": {
@@ -45,7 +55,12 @@
     "@nestjs/testing": "10.4.15",
     "@nestjs/swagger": "8.1.0",
     "typeorm": "0.3.20",
-    "supertest": "7.0.0"   
+    "supertest": "7.0.0",
+    "pg": "8.13.1",
+    "mysql2": "3.11.5",
+    "redis": "4.7.0",
+    "typeorm-extension": "3.6.3",
+    "@faker-js/faker": "9.3.0"
   },
   "author": {
     "name": "n4it",

@@ -50,12 +50,10 @@ describe('#crud', () => {
       });
       it('should return status 400', async () => {
         const query = qb.setFilter({ field: 'foo', operator: 'gt' }).query();
-        const res = await request(server)
-          .get('/test')
-          .query(query)
-          const expected = { statusCode: 400, message: 'Invalid filter value' };
-          expect(res.status).toEqual(400);
-          expect(res.body).toMatchObject(expected);
+        const res = await request(server).get('/test').query(query);
+        const expected = { statusCode: 400, message: 'Invalid filter value' };
+        expect(res.status).toEqual(400);
+        expect(res.body).toMatchObject(expected);
       });
     });
 
@@ -64,14 +62,13 @@ describe('#crud', () => {
         await request(server).get('/test/1').expect(200);
       });
       it('should return status 400', async () => {
-        const res = await request(server)
-          .get('/test/invalid')
-            const expected = {
-              statusCode: 400,
-              message: 'Invalid param id. Number expected',
-            };
-          expect(res.status).toEqual(400);
-          expect(res.body).toMatchObject(expected);
+        const res = await request(server).get('/test/invalid');
+        const expected = {
+          statusCode: 400,
+          message: 'Invalid param id. Number expected',
+        };
+        expect(res.status).toEqual(400);
+        expect(res.body).toMatchObject(expected);
       });
     });
 
@@ -91,10 +88,8 @@ describe('#crud', () => {
           lastName: 'lastName',
           email: 'test@test.com',
         };
-        const res = await request(server)
-          .post('/test')
-          .send(send)
-          expect(res.status).toEqual(400);
+        const res = await request(server).post('/test').send(send);
+        expect(res.status).toEqual(400);
       });
     });
 
@@ -122,10 +117,8 @@ describe('#crud', () => {
         const send: CreateManyDto<TestModel> = {
           bulk: [],
         };
-        const res = await request(server)
-          .post('/test/bulk')
-          .send(send)
-          expect(res.status).toEqual(400);
+        const res = await request(server).post('/test/bulk').send(send);
+        expect(res.status).toEqual(400);
       });
     });
 
@@ -146,10 +139,8 @@ describe('#crud', () => {
           lastName: 'lastName',
           email: 'test@test.com',
         };
-        const res = await request(server)
-          .put('/test/1')
-          .send(send)
-          expect(res.status).toEqual(400);
+        const res = await request(server).put('/test/1').send(send);
+        expect(res.status).toEqual(400);
       });
     });
 
@@ -170,10 +161,8 @@ describe('#crud', () => {
           lastName: 'lastName',
           email: 'test@test.com',
         };
-        const res = await request(server)
-          .patch('/test/1')
-          .send(send)
-          expect(res.status).toEqual(400);
+        const res = await request(server).patch('/test/1').send(send);
+        expect(res.status).toEqual(400);
       });
     });
 

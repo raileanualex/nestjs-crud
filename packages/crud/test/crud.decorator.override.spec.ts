@@ -82,20 +82,16 @@ describe('#crud', () => {
 
     describe('#override getMany', () => {
       it('should return status 200', async () => {
-        const res = await request(server)
-          .get('/test')
-          .expect(200)
-          const expected = { foo: 'bar' };
-          expect(res.body).toMatchObject(expected);
+        const res = await request(server).get('/test').expect(200);
+        const expected = { foo: 'bar' };
+        expect(res.body).toMatchObject(expected);
       });
       it('should return status 400', async () => {
         const query = qb.setFilter({ field: 'foo', operator: 'gt' }).query();
-        const res = await request(server)
-          .get('/test')
-          .query(query)
-          const expected = { statusCode: 400, message: 'Invalid filter value' };
-          expect(res.status).toEqual(400);
-          expect(res.body).toMatchObject(expected);
+        const res = await request(server).get('/test').query(query);
+        const expected = { statusCode: 400, message: 'Invalid filter value' };
+        expect(res.status).toEqual(400);
+        expect(res.body).toMatchObject(expected);
       });
       it('should have action metadata', () => {
         const action = R.getAction(TestController.prototype.getMany);
@@ -144,10 +140,8 @@ describe('#crud', () => {
         const send: CreateManyDto<TestModel> = {
           bulk: [],
         };
-        const res = await request(server)
-          .post('/test/bulk')
-          .send(send)
-          expect(res.status).toEqual(400);
+        const res = await request(server).post('/test/bulk').send(send);
+        expect(res.status).toEqual(400);
       });
       it('should return status 201', async () => {
         const send: CreateManyDto<TestModel> = {
@@ -166,13 +160,10 @@ describe('#crud', () => {
             },
           ],
         };
-        const res = await request(server)
-          .post('/test/bulk')
-          .send(send)
-          .expect(201)
-          expect(res.body).toHaveProperty('req');
-          expect(res.body).toHaveProperty('dto');
-          expect(res.body.dto).toMatchObject(send);
+        const res = await request(server).post('/test/bulk').send(send).expect(201);
+        expect(res.body).toHaveProperty('req');
+        expect(res.body).toHaveProperty('dto');
+        expect(res.body.dto).toMatchObject(send);
       });
     });
   });

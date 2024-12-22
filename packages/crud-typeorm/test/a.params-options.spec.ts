@@ -5,16 +5,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as request from 'supertest';
 
 import { Company } from '../../../integration/crud-typeorm/companies';
-import { withCache } from '../../../integration/crud-typeorm/orm.config';
+import { isPg, postgresConfig, mySqlConfig } from '../../../database';
 import { Project } from '../../../integration/crud-typeorm/projects';
 import { User } from '../../../integration/crud-typeorm/users';
 import { UserProfile } from '../../../integration/crud-typeorm/users-profiles';
 import { HttpExceptionFilter } from '../../../integration/shared/https-exception.filter';
-import { Crud } from '../../crud/src/decorators/crud.decorator';
+import { Crud } from '@n4it/crud';
 import { UsersService } from './__fixture__/users.service';
 
-// tslint:disable:max-classes-per-file
 describe('#crud-typeorm', () => {
+  const withCache = isPg ? postgresConfig : mySqlConfig;
+
   describe('#params options', () => {
     let app: INestApplication;
     let server: any;
