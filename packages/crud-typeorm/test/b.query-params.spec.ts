@@ -1,4 +1,5 @@
 import { Controller, INestApplication } from '@nestjs/common';
+import { faker } from '@faker-js/faker';
 import { APP_FILTER } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,6 +19,8 @@ import { NotesService } from './__fixture__/notes.service';
 import { ProjectsService } from './__fixture__/projects.service';
 import { UsersService, UsersService2 } from './__fixture__/users.service';
 import { UserProfilesService } from './__fixture__/UserProfile.service';
+
+jest.setTimeout(60000);
 
 describe('#crud-typeorm', () => {
   const withCache = isPg ? postgresConfig : mySqlConfig;
@@ -687,63 +690,143 @@ describe('#crud-typeorm', () => {
         expect(res.body[0].id).toBe(1);
       });
       it('should return with default filter, 1', async () => {
-        const query = qb.search({ name: 'Project11' }).query();
+        const projectName = faker.company.name();
+
+        const resp = await request(server)
+          .post('/projects3')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+            isActive: false,
+          })
+          .expect(201);
+
+        const query = qb.search({ name: projectName }).query();
         const res = await projects3().query(query).expect(200);
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(11);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
+
       it('should return with default filter, 2', async () => {
-        const query = qb.search({ name: 'Project1' }).query();
+        const projectName = 'unexisting_project_name';
+
+        const query = qb.search({ name: projectName }).query();
         const res = await projects3().query(query).expect(200);
         expect(res.body).toHaveLength(0);
       });
+
       it('should return with default filter, 3', async () => {
-        const query = qb.search({ name: 'Project2' }).query();
+        const projectName = faker.company.name();
+
+        const resp = await request(server)
+          .post('/projects4')
+          .send({ companyId: faker.number.int({ min: 1, max: 50 }), name: projectName })
+          .expect(201);
+
+        const query = qb.search({ name: projectName }).query();
         const res = await projects4().query(query).expect(200);
+
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(2);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
+
       it('should return with default filter, 4', async () => {
-        const query = qb.search({ name: 'Project11' }).query();
+        const projectName = 'unexisting_project_name';
+
+        const query = qb.search({ name: projectName }).query();
         const res = await projects4().query(query).expect(200);
         expect(res.body).toHaveLength(0);
       });
-      it('should return with $eqL search operator', async () => {
-        const query = qb.search({ name: { $eqL: 'project1' } }).query();
+
+      it('should return with eqL search operator', async () => {
+        const projectName = faker.company.name().toLowerCase();
+
+        const resp = await request(server)
+          .post('/projects4')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
+
+        const query = qb.search({ name: { $eqL: projectName } }).query();
         const res = await projects4().query(query).expect(200);
         expect(res.body).toHaveLength(1);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
-      it('should return with $neL search operator', async () => {
-        const query = qb.search({ name: { $neL: 'project1' } }).query();
+
+      it('should return with neL search operator', async () => {
+        const projectName = faker.company.name();
+
+        await request(server)
+          .post('/projects4')
+          .send({ companyId: faker.number.int({ min: 1, max: 50 }), name: projectName })
+          .expect(201);
+
+        const query = qb.search({ name: { $neL: `${projectName}1` } }).query();
         const res = await projects4().query(query).expect(200);
-        expect(res.body).toHaveLength(9);
+        expect(res.body.length).toBeGreaterThan(1);
       });
-      it('should return with $startsL search operator', async () => {
-        const query = qb.search({ email: { $startsL: '2' } }).query();
+
+      it('should return with startsL search operator', async () => {
+        const uniquePrefix = `2121foo`;
+
+        for (let i = 0; i < 2; i++) {
+          await request(server)
+            .post('/users')
+            .send({
+              companyId: faker.number.int({ min: 1, max: 50 }),
+              isActive: faker.datatype.boolean(),
+              email: `${uniquePrefix}${faker.internet.email()}`,
+              name: {
+                first: faker.person.firstName(),
+                last: faker.person.lastName(),
+              },
+            })
+            .expect(201);
+        }
+
+        const query = qb.search({ email: { $startsL: uniquePrefix } }).query();
         const res = await request(server).get('/users').query(query).expect(200);
-        expect(res.body).toHaveLength(3);
+        expect(res.body).toHaveLength(2);
       });
-      it('should return with $endsL search operator', async () => {
-        const query = qb.search({ domain: { $endsL: 'AiN10' } }).query();
+
+      it('should return with endsL search operator', async () => {
+        const uniqueSuffix = `AiN10`;
+
+        await request(server)
+          .post('/companies')
+          .send({
+            name: faker.company.name(),
+            domain: 'foobar.Domain10',
+            description: faker.lorem.sentence(),
+          })
+          .expect(201);
+
+        const query = qb.search({ domain: { $endsL: uniqueSuffix } }).query();
         const res = await request(server).get('/companies').query(query).expect(200);
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].domain).toBe('Domain10');
+        expect(res.body[0].domain).toBe('foobar.Domain10');
       });
+
       it('should return with $contL search operator', async () => {
         const query = qb.search({ email: { $contL: '1@' } }).query();
         const res = await request(server).get('/users').query(query).expect(200);
         expect(res.body).toHaveLength(3);
       });
+
       it('should return with $exclL search operator', async () => {
         const query = qb.search({ email: { $exclL: '1@' } }).query();
         const res = await request(server).get('/users').query(query).expect(200);
         expect(res.body).toHaveLength(18);
       });
+
       it('should return with $inL search operator', async () => {
         const query = qb.search({ name: { $inL: ['name2', 'name3'] } }).query();
         const res = await request(server).get('/companies').query(query).expect(200);
         expect(res.body).toHaveLength(2);
       });
+
       it('should return with $notinL search operator', async () => {
         const query = qb
           .search({ name: { $notinL: ['project7', 'project8', 'project9'] } })

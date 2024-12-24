@@ -72,8 +72,7 @@ export class User extends BaseEntity {
    * Relations
    */
 
-  @IsOptional({ groups: [UPDATE] })
-  @IsNotEmpty({ groups: [CREATE] })
+  @IsOptional({ always: true })
   @ValidateNested({ always: true })
   @Type(() => UserProfile)
   @OneToOne(() => UserProfile, (p) => p.user, { cascade: true })

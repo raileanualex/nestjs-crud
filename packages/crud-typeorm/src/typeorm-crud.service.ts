@@ -1027,8 +1027,8 @@ export class TypeOrmCrudService<T> extends CrudService<T, DeepPartial<T>> {
     return query.sort && query.sort.length
       ? this.mapSort(query.sort)
       : options.sort && options.sort.length
-        ? this.mapSort(options.sort)
-        : {};
+      ? this.mapSort(options.sort)
+      : {};
   }
 
   protected getFieldWithAlias(field: string, sort: boolean = false) {
