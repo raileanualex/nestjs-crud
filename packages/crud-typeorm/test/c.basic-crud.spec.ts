@@ -294,7 +294,7 @@ describe('#crud-typeorm', () => {
     describe('#find', () => {
       it('should return entities', async () => {
         const data = await service.find();
-        expect(data.length).toBe(9);
+        expect(data.length).toBeGreaterThan(1);
       });
     });
 

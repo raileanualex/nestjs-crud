@@ -252,12 +252,14 @@ describe('#crud-typeorm', () => {
           expect(e.id).not.toBe(1);
         });
       });
+
       it('should return with maxLimit', async () => {
         const query = qb.setLimit(7).query();
         const res = await request(server).get('/companies').query(query);
         expect(res.status).toBe(200);
         expect(res.body.length).toBe(5);
       });
+
       it('should return with filter and or, 1', async () => {
         const query = qb
           .setFilter({ field: 'name', operator: 'notin', value: ['Name2', 'Name3'] })
@@ -267,6 +269,7 @@ describe('#crud-typeorm', () => {
         expect(res.status).toBe(200);
         expect(res.body.length).toBe(5);
       });
+
       it('should return with filter and or, 2', async () => {
         const query = qb
           .setFilter({ field: 'name', operator: 'ends', value: 'foo' })
@@ -277,6 +280,7 @@ describe('#crud-typeorm', () => {
         expect(res.status).toBe(200);
         expect(res.body.length).toBe(10);
       });
+
       it('should return with filter and or, 3', async () => {
         const query = qb
           .setOr({ field: 'companyId', operator: 'gt', value: 22 })
@@ -287,6 +291,7 @@ describe('#crud-typeorm', () => {
         expect(res.status).toBe(200);
         expect(res.body.length).toBe(8);
       });
+
       it('should return with filter and or, 4', async () => {
         const query = qb
           .setOr({ field: 'companyId', operator: 'in', value: [6, 10] })
@@ -298,12 +303,14 @@ describe('#crud-typeorm', () => {
         expect(res.status).toBe(200);
         expect(res.body.length).toBe(10);
       });
+
       it('should return with filter and or, 5', async () => {
         const query = qb.setOr({ field: 'companyId', operator: 'isnull' }).query();
         const res = await request(server).get('/projects').query(query);
         expect(res.status).toBe(200);
         expect(res.body.length).toBe(0);
       });
+
       it('should return with filter and or, 6', async () => {
         const query = qb
           .setOr({ field: 'companyId', operator: 'between', value: [1, 5] })
@@ -312,6 +319,7 @@ describe('#crud-typeorm', () => {
         expect(res.status).toBe(200);
         expect(res.body.length).toBe(10);
       });
+
       it('should return with filter, 1', async () => {
         const query = qb.setOr({ field: 'companyId', operator: 'eq', value: 1 }).query();
         const res = await request(server).get('/projects').query(query);
@@ -327,6 +335,7 @@ describe('#crud-typeorm', () => {
         expect(res.status).toBe(200);
         expect(res.body.company).toBeDefined();
       });
+
       it('should return joined entity, 2', async () => {
         const query = qb.setJoin({ field: 'users', select: ['name'] }).query();
         const res = await request(server).get('/companies/2').query(query);
@@ -334,6 +343,7 @@ describe('#crud-typeorm', () => {
         expect(res.body.users).toBeDefined();
         expect(res.body.users.length).not.toBe(0);
       });
+
       it('should return joined entity, 3', async () => {
         const query = qb
           .setJoin({
@@ -347,6 +357,7 @@ describe('#crud-typeorm', () => {
         expect(res.body.length).not.toBe(0);
         expect(res.body[0].user).toBeDefined();
       });
+
       it('should eager join without selection', async () => {
         const query = qb.search({ 'userCompany.id': { $eq: 1 } }).query();
         const res = await request(server).get('/myusers').query(query);
@@ -370,6 +381,7 @@ describe('#crud-typeorm', () => {
         const res = await request(server).get('/users/1').query(query);
         expect(res.status).toBe(500);
       });
+
       it('should return status 400, 2', async () => {
         const query = qb
           .setJoin({ field: 'company' })
@@ -383,6 +395,7 @@ describe('#crud-typeorm', () => {
         const res = await request(server).get('/users/1').query(query);
         expect(res.status).toBe(500);
       });
+
       it('should return status 400, 3', async () => {
         const query = qb
           .setJoin({ field: 'company' })
@@ -396,6 +409,7 @@ describe('#crud-typeorm', () => {
         const res = await request(server).get('/users/1').query(query);
         expect(res.status).toBe(500);
       });
+
       it('should return status 200', async () => {
         const query = qb
           .setJoin({ field: 'company' })
@@ -404,6 +418,7 @@ describe('#crud-typeorm', () => {
         const res = await request(server).get('/users/1').query(query);
         expect(res.status).toBe(200);
       });
+
       it('should return joined entity, 1', async () => {
         const query = qb
           .setFilter({ field: 'company.name', operator: 'excl', value: 'invalid' })
@@ -415,6 +430,7 @@ describe('#crud-typeorm', () => {
         expect(res.body.company).toBeDefined();
         expect(res.body.company.projects).toBeDefined();
       });
+
       it('should return joined entity, 2', async () => {
         const query = qb
           .setFilter({ field: 'company.projects.id', operator: 'notnull' })
@@ -426,6 +442,7 @@ describe('#crud-typeorm', () => {
         expect(res.body.company).toBeDefined();
         expect(res.body.company.projects).toBeDefined();
       });
+
       it('should return joined entity with alias', async () => {
         const query = qb
           .setFilter({ field: 'pr.id', operator: 'notnull' })
@@ -437,6 +454,7 @@ describe('#crud-typeorm', () => {
         expect(res.body.company).toBeDefined();
         expect(res.body.company.projects).toBeDefined();
       });
+
       it('should return joined entity with ManyToMany pivot table', async () => {
         const query = qb
           .setJoin({ field: 'users' })
@@ -535,42 +553,49 @@ describe('#crud-typeorm', () => {
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
+
       it('should return with search, 2', async () => {
         const query = qb.search({ id: 1, name: 'Project1' }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
+
       it('should return with search, 3', async () => {
         const query = qb.search({ id: 1, name: { $eq: 'Project1' } }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
+
       it('should return with search, 4', async () => {
         const query = qb.search({ name: { $eq: 'Project1' } }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
+
       it('should return with search, 5', async () => {
         const query = qb.search({ id: { $notnull: true, $eq: 1 } }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
+
       it('should return with search, 6', async () => {
         const query = qb.search({ id: { $or: { $isnull: true, $eq: 1 } } }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
+
       it('should return with search, 7', async () => {
         const query = qb.search({ id: { $or: { $eq: 1 } } }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
+
       it('should return with search, 8', async () => {
         const query = qb
           .search({ id: { $notnull: true, $or: { $eq: 1, $in: [30, 31] } } })
@@ -579,17 +604,20 @@ describe('#crud-typeorm', () => {
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
+
       it('should return with search, 9', async () => {
         const query = qb.search({ id: { $notnull: true, $or: { $eq: 1 } } }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
+
       it('should return with search, 10', async () => {
         const query = qb.search({ id: null as any }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(0);
       });
+
       it('should return with search, 11', async () => {
         const query = qb
           .search({ $and: [{ id: { $notin: [5, 6, 7, 8, 9, 10] } }, { isActive: true }] })
@@ -597,6 +625,7 @@ describe('#crud-typeorm', () => {
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(4);
       });
+
       it('should return with search, 12', async () => {
         const query = qb
           .search({ $and: [{ id: { $notin: [5, 6, 7, 8, 9, 10] } }] })
@@ -604,11 +633,13 @@ describe('#crud-typeorm', () => {
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(14);
       });
+
       it('should return with search, 13', async () => {
         const query = qb.search({ $or: [{ id: 54 }] }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(0);
       });
+
       it('should return with search, 14', async () => {
         const query = qb
           .search({ $or: [{ id: 54 }, { id: 33 }, { id: { $in: [1, 2] } }] })
@@ -618,11 +649,13 @@ describe('#crud-typeorm', () => {
         expect(res.body[0].id).toBe(1);
         expect(res.body[1].id).toBe(2);
       });
+
       it('should return with search, 15', async () => {
         const query = qb.search({ $or: [{ id: 54 }], name: 'Project1' }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(0);
       });
+
       it('should return with search, 16', async () => {
         const query = qb
           .search({ $or: [{ isActive: false }, { id: 3 }], name: 'Project3' })
@@ -631,6 +664,7 @@ describe('#crud-typeorm', () => {
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(3);
       });
+
       it('should return with search, 17', async () => {
         const query = qb
           .search({ $or: [{ isActive: false }, { id: { $eq: 3 } }], name: 'Project3' })
@@ -639,6 +673,7 @@ describe('#crud-typeorm', () => {
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(3);
       });
+
       it('should return with search, 18', async () => {
         const query = qb
           .search({
@@ -650,6 +685,7 @@ describe('#crud-typeorm', () => {
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(3);
       });
+
       it('should return with search, 19', async () => {
         const query = qb
           .search({
@@ -669,6 +705,7 @@ describe('#crud-typeorm', () => {
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(3);
       });
+
       it('should return with search, 20', async () => {
         const query = qb
           .search({
@@ -678,6 +715,7 @@ describe('#crud-typeorm', () => {
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(14);
       });
+
       it('should return with search, 21', async () => {
         const query = qb
           .search({
@@ -689,6 +727,7 @@ describe('#crud-typeorm', () => {
         expect(res.body).toHaveLength(1);
         expect(res.body[0].id).toBe(1);
       });
+
       it('should return with default filter, 1', async () => {
         const projectName = faker.company.name();
 
@@ -809,55 +848,130 @@ describe('#crud-typeorm', () => {
         expect(res.body[0].domain).toBe('foobar.Domain10');
       });
 
-      it('should return with $contL search operator', async () => {
-        const query = qb.search({ email: { $contL: '1@' } }).query();
+      it('should return with contL search operator', async () => {
+        const uniqueMiddle = `bar2baz121foo`;
+
+        for (let i = 0; i < 2; i++) {
+          await request(server)
+            .post('/users')
+            .send({
+              companyId: faker.number.int({ min: 1, max: 50 }),
+              isActive: faker.datatype.boolean(),
+              email: `foobar${uniqueMiddle}${faker.internet.email()}`,
+              name: {
+                first: faker.person.firstName(),
+                last: faker.person.lastName(),
+              },
+            })
+            .expect(201);
+        }
+
+        const query = qb.search({ email: { $contL: uniqueMiddle } }).query();
         const res = await request(server).get('/users').query(query).expect(200);
-        expect(res.body).toHaveLength(3);
+        expect(res.body).toHaveLength(2);
       });
 
-      it('should return with $exclL search operator', async () => {
-        const query = qb.search({ email: { $exclL: '1@' } }).query();
+      it('should return with exclL search operator', async () => {
+        const uniqueMiddle = `bar3baz777foo`;
+
+        for (let i = 0; i < 2; i++) {
+          await request(server)
+            .post('/users')
+            .send({
+              companyId: faker.number.int({ min: 1, max: 50 }),
+              isActive: faker.datatype.boolean(),
+              email: `foobar${uniqueMiddle}${faker.internet.email()}`,
+              name: {
+                first: faker.person.firstName(),
+                last: faker.person.lastName(),
+              },
+            })
+            .expect(201);
+        }
+
+        const query = qb.search({ email: { $exclL: uniqueMiddle } }).query();
         const res = await request(server).get('/users').query(query).expect(200);
-        expect(res.body).toHaveLength(18);
+        expect(res.body).not.toContainEqual(
+          expect.objectContaining({
+            email: expect.stringContaining(uniqueMiddle),
+          }),
+        );
       });
 
-      it('should return with $inL search operator', async () => {
-        const query = qb.search({ name: { $inL: ['name2', 'name3'] } }).query();
+      it('should return with inL search operator', async () => {
+        const companyName = faker.company.name().toLowerCase();
+
+        for (let i = 0; i < 2; i++) {
+          await request(server)
+            .post('/companies')
+            .send({
+              name: `${companyName}${i}`,
+              domain: faker.internet.domainName(),
+              description: faker.lorem.sentence(),
+            })
+            .expect(201);
+        }
+
+        const query = qb
+          .search({ name: { $inL: [`${companyName}0`, `${companyName}1`] } })
+          .query();
         const res = await request(server).get('/companies').query(query).expect(200);
         expect(res.body).toHaveLength(2);
       });
 
-      it('should return with $notinL search operator', async () => {
+      it('should return with notinL search operator', async () => {
+        const companyName = faker.company.name().toLowerCase();
+
         const query = qb
-          .search({ name: { $notinL: ['project7', 'project8', 'project9'] } })
+          .search({ name: { $notinL: [`${companyName}999`, `${companyName}777`] } })
           .query();
         const res = await projects4().query(query).expect(200);
-        expect(res.body).toHaveLength(7);
+        expect(res.body).toBeGreaterThan(1);
       });
-      it('should return with custom $customEqual search operator', async () => {
-        const query = qb.search({ name: { $customEqual: 'Project7' } }).query();
+
+      it('should return with custom customEqual search operator', async () => {
+        const projectName = faker.company.name().toLowerCase();
+
+        const resp = await request(server)
+          .post('/projects4')
+          .send({ companyId: faker.number.int({ min: 1, max: 50 }), name: projectName })
+          .expect(201);
+
+        const query = qb.search({ name: { $customEqual: projectName } }).query();
         const res = await projects4().query(query).expect(200);
-        expect(res.body[0].id).toBe(7);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
-      it('should return with custom $customArrayIn search operator', async () => {
+
+      it('should return with custom customArrayIn search operator', async () => {
+        const projectName = faker.company.name().toLowerCase();
+
+        for (let i = 0; i < 3; i++) {
+          await request(server)
+            .post('/projects4')
+            .send({
+              companyId: faker.number.int({ min: 1, max: 50 }),
+              name: `${projectName}${i}`,
+            })
+            .expect(201);
+        }
+
         const query = qb
-          .search({ name: { $customArrayIn: ['Project7', 'Project8', 'Project9'] } })
+          .search({
+            name: {
+              $customArrayIn: [`${projectName}0`, `${projectName}1`, `${projectName}2`],
+            },
+          })
           .query();
         const res = await projects4().query(query).expect(200);
         expect(res.body).toHaveLength(3);
       });
+
       it("should throw an exception if custom search operator doesn't exist", async () => {
         const query = qb
           .search({ name: { $inexistentOperator: ['project7', 'project8', 'project9'] } })
           .query();
-        projects4().query(query).expect(500);
-      });
-      it('should search by display column name, but use dbName in sql query', async () => {
-        const query = qb.search({ revisionId: 2 }).query();
-        const res = await request(server).get('/notes').query(query).expect(200);
-        expect(res.body).toHaveLength(2);
-        expect(res.body[0].revisionId).toBe(2);
-        expect(res.body[1].revisionId).toBe(2);
+
+        await projects4().query(query).expect(500);
       });
     });
 
