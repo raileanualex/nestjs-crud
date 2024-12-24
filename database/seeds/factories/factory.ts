@@ -29,14 +29,14 @@ export const createUser = (companyId: number, projectId: number, profileId: numb
   profileId,
 });
 
-export const createLicence = () => ({
-  name: faker.company.name(),
+export const createLicense = () => ({
+  name: faker.lorem.word({ length: 32 }),
 });
 
-export const createUserLicence = (userId: number, licenceId: number) => ({
+export const createUserLicense = (userId: number, licenseId: number) => ({
   userId,
-  licenceId,
-  yearsActive: faker.number.int(),
+  licenseId,
+  yearsActive: faker.number.int({ min: 1, max: 5 }),
 });
 
 export const createUserProject = (projectId: number, userId: number) => ({
@@ -46,5 +46,9 @@ export const createUserProject = (projectId: number, userId: number) => ({
 });
 
 export const createNotes = () => ({
-  revisionId: faker.number.int(),
+  revisionId: faker.number.int({ min: 1, max: 100 }),
+});
+
+export const createDevice = () => ({
+  description: faker.lorem.sentence(),
 });

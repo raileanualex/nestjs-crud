@@ -14,11 +14,7 @@ export const createInsertCompany =
     const companyRepository = dataSource.getRepository(Company);
     const companyResult = await companyRepository.insert(createCompany());
 
-    return Promise.all(
-      companyResult.identifiers.map(async (companyIdentifier) =>
-        fns.map((fn) => fn(dataSource)(companyIdentifier.id)),
-      ),
-    );
+    await Promise.all(fns.map((fn) => fn(dataSource)(companyResult.identifiers[0].id)));
   };
 
 export const createInsertProject =
@@ -28,10 +24,8 @@ export const createInsertProject =
     const projectRepository = dataSource.getRepository(Project);
     const projectResult = await projectRepository.insert(createProject(companyId));
 
-    return Promise.all(
-      projectResult.identifiers.map(async (projectIdentifier) =>
-        fns.map((fn) => fn(dataSource)(companyId, projectIdentifier.id)),
-      ),
+    await Promise.all(
+      fns.map((fn) => fn(dataSource)(companyId, projectResult.identifiers[0].id)),
     );
   };
 
