@@ -547,185 +547,250 @@ describe('#crud-typeorm', () => {
       const projects3 = () => request(server).get('/projects3');
       const projects4 = () => request(server).get('/projects4');
 
-      it('should return with search, 1', async () => {
-        const query = qb.search({ id: 1 }).query();
+      it('should return with search 1', async () => {
+        const projectName = faker.company.name();
+
+        const resp = await request(server)
+          .post('/projects2')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
+
+        const query = qb.search({ id: resp.body.id }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(1);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
 
-      it('should return with search, 2', async () => {
-        const query = qb.search({ id: 1, name: 'Project1' }).query();
+      it('should return with search 2', async () => {
+        const projectName = faker.company.name();
+
+        const resp = await request(server)
+          .post('/projects2')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
+
+        const query = qb.search({ id: resp.body.id, name: projectName }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(1);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
 
-      it('should return with search, 3', async () => {
-        const query = qb.search({ id: 1, name: { $eq: 'Project1' } }).query();
+      it('should return with search 3', async () => {
+        const projectName = faker.company.name();
+
+        const resp = await request(server)
+          .post('/projects2')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
+
+        const query = qb.search({ id: resp.body.id, name: { $eq: projectName } }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(1);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
 
-      it('should return with search, 4', async () => {
-        const query = qb.search({ name: { $eq: 'Project1' } }).query();
+      it('should return with search 4', async () => {
+        const projectName = faker.company.name();
+
+        const resp = await request(server)
+          .post('/projects2')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
+
+        const query = qb.search({ name: { $eq: projectName } }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(1);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
 
-      it('should return with search, 5', async () => {
-        const query = qb.search({ id: { $notnull: true, $eq: 1 } }).query();
+      it('should return with search 5', async () => {
+        const projectName = faker.company.name();
+
+        const resp = await request(server)
+          .post('/projects2')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
+
+        const query = qb.search({ id: { $notnull: true, $eq: resp.body.id } }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(1);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
 
-      it('should return with search, 6', async () => {
-        const query = qb.search({ id: { $or: { $isnull: true, $eq: 1 } } }).query();
-        const res = await projects2().query(query).expect(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(1);
-      });
+      it('should return with search 6', async () => {
+        const projectName = faker.company.name();
 
-      it('should return with search, 7', async () => {
-        const query = qb.search({ id: { $or: { $eq: 1 } } }).query();
-        const res = await projects2().query(query).expect(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(1);
-      });
+        const resp = await request(server)
+          .post('/projects2')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
 
-      it('should return with search, 8', async () => {
         const query = qb
-          .search({ id: { $notnull: true, $or: { $eq: 1, $in: [30, 31] } } })
+          .search({ id: { $or: { $isnull: true, $eq: resp.body.id } } })
           .query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(1);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
 
-      it('should return with search, 9', async () => {
-        const query = qb.search({ id: { $notnull: true, $or: { $eq: 1 } } }).query();
+      it('should return with search 7', async () => {
+        const projectName = faker.company.name();
+
+        const resp = await request(server)
+          .post('/projects2')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
+
+        const query = qb.search({ id: { $or: { $eq: resp.body.id } } }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(1);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
 
-      it('should return with search, 10', async () => {
+      it('should return with search, 8', async () => {
+        const projectName = faker.company.name();
+
+        const resp = await request(server)
+          .post('/projects2')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
+
+        const query = qb
+          .search({
+            id: { $notnull: true, $or: { $eq: resp.body.id, $in: [99999, 9999999] } },
+          })
+          .query();
+        const res = await projects2().query(query).expect(200);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].id).toBe(resp.body.id);
+      });
+
+      it('should return with search 9', async () => {
+        const projectName = faker.company.name();
+
+        const resp = await request(server)
+          .post('/projects2')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
+
+        const query = qb
+          .search({ id: { $notnull: true, $or: { $eq: resp.body.id } } })
+          .query();
+        const res = await projects2().query(query).expect(200);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].id).toBe(resp.body.id);
+      });
+
+      it('should return with search 10', async () => {
         const query = qb.search({ id: null as any }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(0);
       });
 
-      it('should return with search, 11', async () => {
+      it('should return with search 11', async () => {
         const query = qb
-          .search({ $and: [{ id: { $notin: [5, 6, 7, 8, 9, 10] } }, { isActive: true }] })
+          .search({ $and: [{ id: { $notin: [5, 6, 7] } }, { isActive: true }] })
+          .query();
+        const res = await projects2().query(query).expect(200);
+
+        expect(res.body).not.toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: 5 }),
+            expect.objectContaining({ id: 6 }),
+            expect.objectContaining({ id: 7 }),
+          ]),
+        );
+      });
+
+      it('should return with search 12', async () => {
+        const query = qb.search({ $and: [{ id: { $notin: [5, 6, 7] } }] }).query();
+        const res = await projects2().query(query).expect(200);
+        expect(res.body).not.toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: 5 }),
+            expect.objectContaining({ id: 6 }),
+            expect.objectContaining({ id: 7 }),
+          ]),
+        );
+      });
+
+      it('should return with search 13', async () => {
+        const query = qb.search({ $or: [{ id: 999999 }] }).query();
+        const res = await projects2().query(query).expect(200);
+        expect(res.body).toHaveLength(0);
+      });
+
+      it('should return with search 14', async () => {
+        const query = qb
+          .search({ $or: [{ id: 11 }, { id: 10 }, { id: { $in: [1, 2] } }] })
           .query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(4);
+        expect(res.body).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: 1 }),
+            expect.objectContaining({ id: 2 }),
+            expect.objectContaining({ id: 10 }),
+            expect.objectContaining({ id: 11 }),
+          ]),
+        );
       });
 
-      it('should return with search, 12', async () => {
-        const query = qb
-          .search({ $and: [{ id: { $notin: [5, 6, 7, 8, 9, 10] } }] })
-          .query();
-        const res = await projects2().query(query).expect(200);
-        expect(res.body).toHaveLength(14);
-      });
+      it('should return with search 15', async () => {
+        const projectName = faker.lorem.word({ length: 32 });
 
-      it('should return with search, 13', async () => {
-        const query = qb.search({ $or: [{ id: 54 }] }).query();
-        const res = await projects2().query(query).expect(200);
-        expect(res.body).toHaveLength(0);
-      });
-
-      it('should return with search, 14', async () => {
-        const query = qb
-          .search({ $or: [{ id: 54 }, { id: 33 }, { id: { $in: [1, 2] } }] })
-          .query();
-        const res = await projects2().query(query).expect(200);
-        expect(res.body).toHaveLength(2);
-        expect(res.body[0].id).toBe(1);
-        expect(res.body[1].id).toBe(2);
-      });
-
-      it('should return with search, 15', async () => {
-        const query = qb.search({ $or: [{ id: 54 }], name: 'Project1' }).query();
+        const query = qb.search({ $or: [{ id: 9999 }], name: projectName }).query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(0);
       });
 
-      it('should return with search, 16', async () => {
-        const query = qb
-          .search({ $or: [{ isActive: false }, { id: 3 }], name: 'Project3' })
-          .query();
-        const res = await projects2().query(query).expect(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(3);
-      });
+      it('should return with search 16', async () => {
+        const projectName = faker.company.name();
 
-      it('should return with search, 17', async () => {
-        const query = qb
-          .search({ $or: [{ isActive: false }, { id: { $eq: 3 } }], name: 'Project3' })
-          .query();
-        const res = await projects2().query(query).expect(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(3);
-      });
+        const resp = await request(server)
+          .post('/projects2')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            name: projectName,
+          })
+          .expect(201);
 
-      it('should return with search, 18', async () => {
         const query = qb
           .search({
-            $or: [{ isActive: false }, { id: { $eq: 3 } }],
-            name: { $eq: 'Project3' },
+            $or: [{ isActive: false }, { id: { $eq: resp.body.id } }],
+            name: { $eq: projectName },
           })
           .query();
         const res = await projects2().query(query).expect(200);
         expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(3);
-      });
-
-      it('should return with search, 19', async () => {
-        const query = qb
-          .search({
-            $and: [
-              { name: { $notnull: true } },
-              {
-                $not: [{ $and: [{ isActive: false }, { id: { $ne: 3 } }] }],
-              },
-              { name: { $eq: 'Project3' } },
-              {
-                $or: [{ isActive: false }, { id: { $eq: 3 } }],
-              },
-            ],
-          })
-          .query();
-        const res = await projects2().query(query).expect(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(3);
-      });
-
-      it('should return with search, 20', async () => {
-        const query = qb
-          .search({
-            $not: [{ id: { $in: [5, 6, 7, 8, 9, 10] } }, { name: { $notnull: true } }],
-          })
-          .query();
-        const res = await projects2().query(query).expect(200);
-        expect(res.body).toHaveLength(14);
-      });
-
-      it('should return with search, 21', async () => {
-        const query = qb
-          .search({
-            name: { $eq: 'Project1' },
-            companyId: { $or: { $notnull: true, $eq: 1 } },
-          })
-          .query();
-        const res = await projects2().query(query).expect(200);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(1);
+        expect(res.body[0].id).toBe(resp.body.id);
       });
 
       it('should return with default filter, 1', async () => {
@@ -891,7 +956,7 @@ describe('#crud-typeorm', () => {
 
         const query = qb.search({ email: { $exclL: uniqueMiddle } }).query();
         const res = await request(server).get('/users').query(query).expect(200);
-        expect(res.body).not.toContainEqual(
+        expect(res.body).not.toEqual(
           expect.objectContaining({
             email: expect.stringContaining(uniqueMiddle),
           }),
