@@ -277,10 +277,13 @@ export class TypeOrmCrudService<T> extends CrudService<T, DeepPartial<T>> {
     const toReturn = returnDeleted
       ? plainToClass(this.entityType, { ...found }, req.parsed.classTransformOptions)
       : undefined;
-    const deleted =
-      req.options.query.softDelete === true
-        ? await this.repo.softRemove(found as DeepPartial<T>)
-        : await this.repo.remove(found);
+
+    if (req.options.query.softDelete === true) {
+      await this.repo.softRemove(found as DeepPartial<T>);
+    } else {
+      await this.repo.remove(found);
+    }
+
     return toReturn;
   }
 

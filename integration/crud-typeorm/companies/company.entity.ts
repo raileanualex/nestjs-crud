@@ -1,5 +1,11 @@
 import { CrudValidationGroups } from '@n4it/crud';
-import { Entity, Column, OneToMany, PrimaryGeneratedColumn, DeleteDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 import {
   IsOptional,
   IsString,
