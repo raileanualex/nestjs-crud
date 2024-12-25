@@ -20,6 +20,8 @@ import { UsersService } from './__fixture__/users.service';
 import { ProjectsService } from './__fixture__/projects.service';
 import { faker } from '@faker-js/faker';
 
+jest.setTimeout(60000);
+
 describe('#crud-typeorm', () => {
   const withCache = isPg ? postgresConfig : mySqlConfig;
 

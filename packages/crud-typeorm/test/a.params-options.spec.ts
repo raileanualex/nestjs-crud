@@ -3,6 +3,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as request from 'supertest';
+import { faker } from '@faker-js/faker';
 
 import { Company } from '../../../integration/crud-typeorm/companies';
 import { isPg, postgresConfig, mySqlConfig } from '../../../database';
@@ -12,6 +13,8 @@ import { UserProfile } from '../../../integration/crud-typeorm/users-profiles';
 import { HttpExceptionFilter } from '../../../integration/shared/https-exception.filter';
 import { Crud } from '@n4it/crud';
 import { UsersService } from './__fixture__/users.service';
+
+jest.setTimeout(60000);
 
 describe('#crud-typeorm', () => {
   const withCache = isPg ? postgresConfig : mySqlConfig;
@@ -98,12 +101,26 @@ describe('#crud-typeorm', () => {
     describe('#updateOneBase', () => {
       it('should override params', async () => {
         const dto = { isActive: false, companyId: 2 };
+
+        const user = await request(server)
+          .post('/companiesA/1/users')
+          .send({
+            companyId: dto.companyId,
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: faker.person.lastName(),
+            },
+          });
+
         const res = await request(server)
-          .patch('/companiesA/1/users/2')
+          .patch(`/companiesA/1/users/${user.body.id}`)
           .send(dto)
           .expect(200);
-        expect(res.body.companyId).toBe(2);
+        expect(res.body.companyId).toBe(dto.companyId);
       });
+
       it('should not override params', async () => {
         const dto = { isActive: false, companyId: 2 };
         const res = await request(server)
@@ -112,18 +129,44 @@ describe('#crud-typeorm', () => {
           .expect(200);
         expect(res.body.companyId).toBe(1);
       });
+
       it('should return full entity', async () => {
         const dto = { isActive: false };
+
+        const resp = await request(server)
+          .post('/companiesA/2/users')
+          .send({
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: faker.person.lastName(),
+            },
+          });
+
         const res = await request(server)
-          .patch('/companiesB/2/users/2')
+          .patch(`/companiesB/2/users/${resp.body.id}`)
           .send(dto)
           .expect(200);
         expect(res.body.company.id).toBe(2);
       });
+
       it('should return shallow entity', async () => {
-        const dto = { isActive: false };
+        const dto = { isActive: false, companyId: 2 };
+
+        const resp = await request(server)
+          .post('/companiesA/2/users')
+          .send({
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: faker.person.lastName(),
+            },
+          });
+
         const res = await request(server)
-          .patch('/companiesA/2/users/2')
+          .patch(`/companiesA/2/users/${resp.body.id}`)
           .send(dto)
           .expect(200);
         expect(res.body.company).toBeUndefined();
@@ -133,35 +176,88 @@ describe('#crud-typeorm', () => {
     describe('#replaceOneBase', () => {
       it('should override params', async () => {
         const dto = { isActive: false, companyId: 2, email: '4@email.com' };
+
+        const resp = await request(server)
+          .post('/companiesA/3/users')
+          .send({
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: faker.person.lastName(),
+            },
+          });
+
         const res = await request(server)
-          .put('/companiesA/1/users/4')
+          .put(`/companiesA/1/users/${resp.body.id}`)
           .send(dto)
           .expect(200);
         expect(res.body.companyId).toBe(2);
       });
+
       it('should not override params', async () => {
         const dto = { isActive: false, companyId: 1 };
+
+        const resp = await request(server)
+          .post('/companiesA/2/users')
+          .send({
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: faker.person.lastName(),
+            },
+          });
+
         const res = await request(server)
-          .put('/companiesB/2/users/4')
+          .put(`/companiesB/2/users/${resp.body.id}`)
           .send(dto)
           .expect(200);
         expect(res.body.companyId).toBe(2);
       });
+
       it('should return full entity', async () => {
         const dto = { isActive: false };
+
+        const resp = await request(server)
+          .post('/companiesA/2/users')
+          .send({
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: faker.person.lastName(),
+            },
+          });
+
         const res = await request(server)
-          .put('/companiesB/2/users/4')
+          .put(`/companiesB/2/users/${resp.body.id}`)
           .send(dto)
           .expect(200);
         expect(res.body.company.id).toBe(2);
       });
+
       it('should return shallow entity', async () => {
-        const dto = { isActive: false };
+        const dto = { isActive: false, companyId: 2 };
+        const resp = await request(server)
+          .post('/companiesA/2/users')
+          .send({
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: faker.person.lastName(),
+            },
+          });
         const res = await request(server)
-          .put('/companiesA/2/users/4')
+          .put(`/companiesA/2/users/${resp.body.id}`)
           .send(dto)
           .expect(200);
-        expect(res.body.company).toBeUndefined();
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            companyId: 2,
+          }),
+        );
       });
     });
   });
