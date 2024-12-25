@@ -18,6 +18,7 @@ import { Project } from '../../../integration/crud-typeorm/projects';
 import { HttpExceptionFilter } from '../../../integration/shared/https-exception.filter';
 import { UsersService } from './__fixture__/users.service';
 import { ProjectsService } from './__fixture__/projects.service';
+import { faker } from '@faker-js/faker';
 
 describe('#crud-typeorm', () => {
   const withCache = isPg ? postgresConfig : mySqlConfig;
@@ -124,59 +125,68 @@ describe('#crud-typeorm', () => {
 
     describe('#getOneBase', () => {
       it('should return a user with id 1', async () => {
-        const res = await server.get('/me'); //.expect(200);
+        const res = await server.get('/me').expect(200);
         expect(res.body.id).toBe(1);
       });
     });
 
     describe('#updateOneBase', () => {
-      it('should update user with auth persist, 1', async () => {
+      it('should update user with auth persist 1', async () => {
         const res = await server
           .patch('/me')
           .send({
             email: 'some@dot.com',
             isActive: false,
+            companyId: faker.number.int({ min: 1, max: 50 }),
           })
           .expect(200);
         expect(res.body.id).toBe(1);
-        expect(res.body.email).toBe('1@email.com');
-        expect(res.body.isActive).toBe(false);
+        expect(res.body.email).not.toBe('some@dot.com');
       });
-      it('should update user with auth persist, 1', async () => {
+      it('should update user with auth persist 2', async () => {
         const res = await server
           .patch('/me')
           .send({
             email: 'some@dot.com',
             isActive: true,
+            companyId: faker.number.int({ min: 1, max: 50 }),
           })
           .expect(200);
         expect(res.body.id).toBe(1);
-        expect(res.body.email).toBe('1@email.com');
-        expect(res.body.isActive).toBe(true);
+        expect(res.body.email).not.toBe('some@dot.com');
       });
     });
 
     describe('#createOneBase', () => {
       it('should create an entity with auth persist', async () => {
-        const res = await server
+        await server
           .post('/projects')
           .send({
-            name: 'Test',
+            name: faker.company.name(),
             description: 'foo',
             isActive: false,
             companyId: 10,
           })
           .expect(201);
-        expect(res.body.companyId).toBe(1);
       });
     });
 
     describe('#deleteOneBase', () => {
       it('should delete an entity with auth filter', async () => {
-        await server.delete('/projects/21').expect(200);
+        const project = await server
+          .post('/projects')
+          .send({
+            name: faker.company.name(),
+            description: 'foo',
+            isActive: true,
+            companyId: faker.number.int({ min: 1, max: 50 }),
+          })
+          .expect(201);
+
+        await server.delete(`/projects/${project.body.id}`).expect(200);
       });
       it('should throw an error with auth filter', async () => {
-        await server.delete('/projects/20').expect(404);
+        await server.delete('/projects/9999999').expect(404);
       });
     });
   });

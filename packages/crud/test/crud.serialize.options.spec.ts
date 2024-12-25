@@ -244,7 +244,7 @@ describe('#crud', () => {
         expect(res.body.isActive).toBeDefined();
       });
       it('should return en empty response', async () => {
-        const res = await request(server).patch('/test3/1/recover').expect(200);
+        const res = await request(server).patch('/test6/1/recover').expect(200);
         expect(res.body).toMatchObject({});
       });
     });

@@ -17,13 +17,4 @@ export const createDbConfig = (type: DatabaseType) => ({
   entities: [join(process.cwd(), 'integration', './**/*.entity{.ts,.js}')],
   migrationsTableName: 'migrations',
   migrations: [`${join(__dirname, 'migrations')}/*`],
-  // cache: {
-  //   type: "redis",
-  //   options: {
-  //     socket: {
-  //       host: "localhost",
-  //       port: 6379
-  //     }
-  //   }
-  // },
 });
