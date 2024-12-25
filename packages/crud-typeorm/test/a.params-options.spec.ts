@@ -123,8 +123,20 @@ describe('#crud-typeorm', () => {
 
       it('should not override params', async () => {
         const dto = { isActive: false, companyId: 2 };
+
+        const resp = await request(server)
+          .post('/companiesA/1/users')
+          .send({
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: faker.person.lastName(),
+            },
+          });
+
         const res = await request(server)
-          .patch('/companiesB/1/users/3')
+          .patch(`/companiesB/1/users/${resp.body.id}`)
           .send(dto)
           .expect(200);
         expect(res.body.companyId).toBe(1);
