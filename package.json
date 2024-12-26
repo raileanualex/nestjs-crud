@@ -1,6 +1,6 @@
 {
   "name": "@n4it/nestjs-crud",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Nest CRUD for RESTful APIs",
   "license": "MIT",
   "workspaces": [
