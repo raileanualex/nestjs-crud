@@ -27,6 +27,12 @@
     "test:postgres": "yarn db:prepare:typeorm && yarn test",
     "test:mysql": "yarn db:prepare:typeorm:mysql && TYPEORM_CONNECTION=mysql yarn test"
   },
+  "keywords": [
+    "nestjs",
+    "nest",
+    "crud",
+    "n4it"
+  ],
   "dependencies": {},
   "devDependencies": {
     "lerna": "7.1.1",
