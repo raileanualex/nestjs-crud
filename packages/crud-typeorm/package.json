@@ -40,6 +40,6 @@
     "build": "npx tsc -b"
   },
   "devDependencies": {
-    "@n4it/crud": "1.0.0"
+    "@n4it/crud": "^1.0.0"
   }
 }
