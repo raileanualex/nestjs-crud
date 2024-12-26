@@ -37,3 +37,6 @@ jobs:
 
       - name: Build the project
         run: yarn build
+
+      - name: Test all
+        run: yarn test:coverage
