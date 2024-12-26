@@ -1,7 +1,7 @@
 import { ExecutionContext } from '@nestjs/common';
 import { R } from '../crud/reflection.helper';
-import { CrudActions } from '../enums';
 import { MergedCrudOptions } from '../interfaces';
+import { CrudActions } from '../constants';
 
 export class CrudBaseInterceptor {
   protected getCrudInfo(context: ExecutionContext): {

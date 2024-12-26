@@ -2,11 +2,10 @@ import { HttpStatus } from '@nestjs/common';
 import { RequestQueryBuilder } from '@n4it/crud-request';
 import { isString, objKeys } from '@n4it/crud-util';
 import type { MergedCrudOptions, ParamsOptions } from '../interfaces';
-import { BaseRouteName } from '../types';
 import { safeRequire } from '../util';
 import { R } from './reflection.helper';
 import { SwaggerModels } from '.';
-const pluralize = require('pluralize');
+import { BaseRouteName } from '../constants';
 
 export const swagger = safeRequire('@nestjs/swagger', () => require('@nestjs/swagger'));
 export const swaggerConst = safeRequire('@nestjs/swagger/dist/constants', () =>
@@ -24,9 +23,9 @@ export class Swagger {
    */
   static operationsMap(modelName): { [key in BaseRouteName]: string } {
     return {
-      getManyBase: `Retrieve multiple ${pluralize(modelName)}`,
+      getManyBase: `Retrieve multiple ${modelName}`,
       getOneBase: `Retrieve a single ${modelName}`,
-      createManyBase: `Create multiple ${pluralize(modelName)}`,
+      createManyBase: `Create multiple ${modelName}`,
       createOneBase: `Create a single ${modelName}`,
       updateOneBase: `Update a single ${modelName}`,
       replaceOneBase: `Replace a single ${modelName}`,

@@ -42,8 +42,7 @@
   "dependencies": {
     "@n4it/crud-request": "^0.0.0",
     "@n4it/crud-util": "^0.0.0",
-    "deepmerge": "^3.2.0",
-    "pluralize": "^8.0.0"
+    "deepmerge": "^3.2.0"
   },
   "peerDependencies": {
     "class-transformer": "*",

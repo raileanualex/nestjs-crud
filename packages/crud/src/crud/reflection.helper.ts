@@ -3,8 +3,7 @@ import * as CONSTANTS from '@nestjs/common/constants';
 import { ArgumentsHost } from '@nestjs/common';
 import { isFunction } from '@n4it/crud-util';
 
-import { BaseRoute, MergedCrudOptions, AuthOptions } from '../interfaces';
-import { BaseRouteName } from '../types';
+import { MergedCrudOptions, AuthOptions } from '../interfaces';
 import {
   CRUD_OPTIONS_METADATA,
   ACTION_NAME_METADATA,
@@ -12,8 +11,10 @@ import {
   PARSED_BODY_METADATA,
   OVERRIDE_METHOD_METADATA,
   CRUD_AUTH_OPTIONS_METADATA,
+  CrudActions,
+  BaseRouteName,
 } from '../constants';
-import { CrudActions } from '../enums';
+import { BaseRoute } from '../types';
 
 const {
   CUSTOM_ROUTE_ARGS_METADATA = CONSTANTS['CUSTOM_ROUTE_ARGS_METADATA'],
@@ -23,6 +24,7 @@ const {
   PATH_METADATA,
   ROUTE_ARGS_METADATA,
 } = CONSTANTS;
+
 export class R {
   static set(
     metadataKey: any,

@@ -5,10 +5,10 @@ import { APP_FILTER } from '@nestjs/core';
 import { CrudRoutesFactory } from '../src/crud/crud-routes.factory';
 import { Swagger } from '../src/crud/swagger.helper';
 import { Crud } from '../src/decorators';
-import { BaseRouteName } from '../src/types';
 import { HttpExceptionFilter } from './__fixture__/exception.filter';
 import { TestModel } from './__fixture__/models';
 import { TestService } from './__fixture__/services';
+import { BaseRouteName } from '../src';
 
 describe('#crud', () => {
   describe('#options', () => {

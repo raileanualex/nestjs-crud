@@ -1,4 +1,3 @@
-import { RequestMethod } from '@nestjs/common';
 import { RouteParamtypes } from '@nestjs/common/enums/route-paramtypes.enum';
 import {
   getOwnPropNames,
@@ -14,15 +13,20 @@ import {
 } from '@n4it/crud-util';
 import * as deepmerge from 'deepmerge';
 
-import { CrudActions, CrudValidationGroups } from '../enums';
 import { CrudRequestInterceptor, CrudResponseInterceptor } from '../interceptors';
-import { BaseRoute, CrudOptions, CrudRequest, MergedCrudOptions } from '../interfaces';
+import { CrudOptions, CrudRequest, MergedCrudOptions } from '../interfaces';
 import { CrudConfigService } from '../module';
-import { BaseRouteName } from '../types';
 import { R } from './reflection.helper';
 import { SerializeHelper } from './serialize.helper';
 import { Swagger } from './swagger.helper';
 import { Validation } from './validation.helper';
+import {
+  BaseRouteName,
+  crudAuthActionsMap,
+  CrudValidationGroups,
+  getRouteSchema,
+} from '../constants';
+import type { BaseRoute } from '../types';
 
 export interface SwaggerModels {
   get?: any;
@@ -63,21 +67,8 @@ export class CrudRoutesFactory {
     return this.options.model.type;
   }
 
-  protected get actionsMap(): { [key in BaseRouteName]: CrudActions } {
-    return {
-      getManyBase: CrudActions.ReadAll,
-      getOneBase: CrudActions.ReadOne,
-      createManyBase: CrudActions.CreateMany,
-      createOneBase: CrudActions.CreateOne,
-      updateOneBase: CrudActions.UpdateOne,
-      deleteOneBase: CrudActions.DeleteOne,
-      replaceOneBase: CrudActions.ReplaceOne,
-      recoverOneBase: CrudActions.RecoverOne,
-    };
-  }
-
   protected create() {
-    const routesSchema = this.getRoutesSchema();
+    const routesSchema = getRouteSchema();
     this.mergeOptions();
     this.setResponseModels();
     this.createRoutes(routesSchema);
@@ -121,8 +112,8 @@ export class CrudRoutesFactory {
     this.options.params = isObjectFull(this.options.params)
       ? this.options.params
       : isObjectFull(CrudConfigService.config.params)
-        ? CrudConfigService.config.params
-        : {};
+      ? CrudConfigService.config.params
+      : {};
     const hasPrimary = this.getPrimaryParams().length > 0;
     if (!hasPrimary) {
       this.options.params.id = {
@@ -146,10 +137,10 @@ export class CrudRoutesFactory {
     this.options.serialize.getMany = isFalse(this.options.serialize.getMany)
       ? false
       : this.options.serialize.getMany
-        ? this.options.serialize.getMany
-        : isFalse(this.options.serialize.get)
-          ? /* istanbul ignore next */ false
-          : SerializeHelper.createGetManyDto(this.options.serialize.get, this.modelName);
+      ? this.options.serialize.getMany
+      : isFalse(this.options.serialize.get)
+      ? /* istanbul ignore next */ false
+      : SerializeHelper.createGetManyDto(this.options.serialize.get, this.modelName);
     this.options.serialize.create = isFalse(this.options.serialize.create)
       ? false
       : this.options.serialize.create || this.modelType;
@@ -166,80 +157,6 @@ export class CrudRoutesFactory {
         : this.options.serialize.delete || this.modelType;
 
     R.setCrudOptions(this.options, this.target);
-  }
-
-  /**
-   * an array of routes schema for methods (routes) to be generated for the target controller
-   * such as getManyBase, ...
-   * @returns
-   */
-  protected getRoutesSchema(): BaseRoute[] {
-    return [
-      {
-        name: 'getOneBase',
-        path: '/',
-        method: RequestMethod.GET,
-        enable: false,
-        override: false,
-        withParams: true,
-      },
-      {
-        name: 'getManyBase',
-        path: '/',
-        method: RequestMethod.GET,
-        enable: false,
-        override: false,
-        withParams: false,
-      },
-      {
-        name: 'createOneBase',
-        path: '/',
-        method: RequestMethod.POST,
-        enable: false,
-        override: false,
-        withParams: false,
-      },
-      {
-        name: 'createManyBase',
-        path: '/bulk',
-        method: RequestMethod.POST,
-        enable: false,
-        override: false,
-        withParams: false,
-      },
-      {
-        name: 'updateOneBase',
-        path: '/',
-        method: RequestMethod.PATCH,
-        enable: false,
-        override: false,
-        withParams: true,
-      },
-      {
-        name: 'replaceOneBase',
-        path: '/',
-        method: RequestMethod.PUT,
-        enable: false,
-        override: false,
-        withParams: true,
-      },
-      {
-        name: 'deleteOneBase',
-        path: '/',
-        method: RequestMethod.DELETE,
-        enable: false,
-        override: false,
-        withParams: true,
-      },
-      {
-        name: 'recoverOneBase',
-        path: '/recover',
-        method: RequestMethod.PATCH,
-        enable: false,
-        override: false,
-        withParams: true,
-      },
-    ];
   }
 
   /**
@@ -315,7 +232,7 @@ export class CrudRoutesFactory {
     const exclude = this.options.routes.exclude;
 
     // include recover route only for models with soft delete option
-    if (name === 'recoverOneBase' && this.options.query.softDelete !== true) {
+    if (name === BaseRouteName.recoverOneBase && this.options.query.softDelete !== true) {
       return false;
     }
 
@@ -454,11 +371,11 @@ export class CrudRoutesFactory {
 
   protected overrideParsedBodyDecorator(override: BaseRouteName, name: string) {
     const allowed = [
-      'createManyBase',
-      'createOneBase',
-      'updateOneBase',
-      'replaceOneBase',
-    ] as BaseRouteName[];
+      BaseRouteName.createManyBase,
+      BaseRouteName.createOneBase,
+      BaseRouteName.updateOneBase,
+      BaseRouteName.replaceOneBase,
+    ];
     const withBody = isIn(override, allowed);
     const parsedBody = R.getParsedBody(this.targetProto[name]);
 
@@ -541,11 +458,11 @@ export class CrudRoutesFactory {
    */
   protected setRouteArgs(name: BaseRouteName) {
     let rest = {};
-    const routes: BaseRouteName[] = [
-      'createManyBase',
-      'createOneBase',
-      'updateOneBase',
-      'replaceOneBase',
+    const routes = [
+      BaseRouteName.createManyBase,
+      BaseRouteName.createOneBase,
+      BaseRouteName.updateOneBase,
+      BaseRouteName.replaceOneBase,
     ];
 
     //  add ValidationPipe to create, update and replace operations
@@ -607,7 +524,7 @@ export class CrudRoutesFactory {
    * @param name
    */
   protected setAction(name: BaseRouteName) {
-    R.setAction(this.actionsMap[name], this.targetProto[name]);
+    R.setAction(crudAuthActionsMap.get(name), this.targetProto[name]);
   }
 
   /**
@@ -629,10 +546,10 @@ export class CrudRoutesFactory {
   protected setSwaggerPathParams(name: BaseRouteName) {
     const metadata = Swagger.getParams(this.targetProto[name]);
     // operations that don't need the primary key
-    const withoutPrimary: BaseRouteName[] = [
-      'createManyBase',
-      'createOneBase',
-      'getManyBase',
+    const withoutPrimary = [
+      BaseRouteName.createManyBase,
+      BaseRouteName.createOneBase,
+      BaseRouteName.getManyBase,
     ];
 
     // true if withoutPrimary[] includes the operation

@@ -12,9 +12,9 @@ import {
 } from 'class-transformer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CrudActions } from '../enums';
-import { SerializeOptions } from '../interfaces';
 import { CrudBaseInterceptor } from './crud-base.interceptor';
+import { CrudActions } from '../constants';
+import { SerializeOptions } from '../interfaces';
 
 const actionToDtoNameMap: {
   [key in CrudActions]: keyof SerializeOptions;
@@ -25,7 +25,6 @@ const actionToDtoNameMap: {
   [CrudActions.CreateOne]: 'create',
   [CrudActions.UpdateOne]: 'update',
   [CrudActions.ReplaceOne]: 'replace',
-  [CrudActions.DeleteAll]: 'delete',
   [CrudActions.DeleteOne]: 'delete',
   [CrudActions.RecoverOne]: 'recover',
 };

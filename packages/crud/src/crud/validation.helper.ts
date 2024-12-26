@@ -1,9 +1,9 @@
 import { ValidationPipe } from '@nestjs/common';
 import { isFalse, isNil } from '@n4it/crud-util';
-import { CrudValidationGroups } from '../enums';
 import { CreateManyDto, CrudOptions, MergedCrudOptions } from '../interfaces';
 import { safeRequire } from '../util';
 import { ApiProperty } from './swagger.helper';
+import { CrudValidationGroups } from '../constants';
 
 /** class-validator */
 const validator = safeRequire('class-validator', () => require('class-validator'));

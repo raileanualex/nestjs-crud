@@ -14,8 +14,7 @@ import {
 import { isNil, isFunction, isArrayFull, hasLength } from '@n4it/crud-util';
 import { ClassTransformOptions } from 'class-transformer';
 
-import { PARSED_CRUD_REQUEST_KEY } from '../constants';
-import { CrudActions } from '../enums';
+import { CrudActions, PARSED_CRUD_REQUEST_KEY } from '../constants';
 import { CrudRequest, MergedCrudOptions } from '../interfaces';
 import { QueryFilterFunction } from '../types';
 import { CrudBaseInterceptor } from './crud-base.interceptor';

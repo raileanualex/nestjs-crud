@@ -1,2 +1,13 @@
-export * from './base-route-name.type';
-export * from './query-filter-option.type';
+import {
+  QueryFilter,
+  SCondition,
+} from '@n4it/crud-request/lib/types/request-query.types';
+import { getRouteSchema } from '../constants';
+
+export type BaseRoute = ReturnType<typeof getRouteSchema>[number];
+
+export type QueryFilterFunction = (
+  search?: SCondition,
+  getMany?: boolean,
+) => SCondition | void;
+export type QueryFilterOption = QueryFilter[] | SCondition | QueryFilterFunction;

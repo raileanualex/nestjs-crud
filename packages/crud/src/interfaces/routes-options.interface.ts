@@ -1,8 +1,8 @@
-import { BaseRouteName } from '../types';
+import type { BaseRouteName } from '../constants';
 
 export interface RoutesOptions {
-  exclude?: BaseRouteName[];
-  only?: BaseRouteName[];
+  exclude?: (BaseRouteName | keyof typeof BaseRouteName)[];
+  only?: (BaseRouteName | keyof typeof BaseRouteName)[];
   getManyBase?: GetManyRouteOptions;
   getOneBase?: GetOneRouteOptions;
   createOneBase?: CreateOneRouteOptions;

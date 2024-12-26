@@ -3,12 +3,11 @@ import { Test } from '@nestjs/testing';
 import { Controller, INestApplication } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { RequestQueryBuilder } from '@n4it/crud-request';
-import { ParsedBody, ParsedRequest } from '../src';
+import { CrudActions, ParsedBody, ParsedRequest } from '../src';
 
 import { Crud, Override } from '../src/decorators';
 import { CrudController, CrudRequest, CreateManyDto } from '../src/interfaces';
 import { R, Swagger } from '../src/crud';
-import { CrudActions } from '../src/enums';
 import { HttpExceptionFilter } from './__fixture__/exception.filter';
 import { TestModel } from './__fixture__/models';
 import { TestService } from './__fixture__/services';
@@ -99,7 +98,7 @@ describe('#crud', () => {
       });
       it('should return swagger operation', () => {
         const operation = Swagger.getOperation(TestController.prototype.getMany);
-        const expected = { summary: 'Retrieve multiple TestModels' };
+        const expected = { summary: 'Retrieve multiple TestModel' };
         expect(operation).toMatchObject(expected);
       });
       it('should return swagger params', () => {
