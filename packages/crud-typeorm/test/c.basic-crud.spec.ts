@@ -441,6 +441,7 @@ describe('#crud-typeorm', () => {
         const res = await request(server).post('/companies').send('');
         expect(res.status).toBe(400);
       });
+
       it('should return saved entity', async () => {
         const dto = {
           name: 'test0',
@@ -450,6 +451,7 @@ describe('#crud-typeorm', () => {
         expect(res.status).toBe(201);
         expect(res.body.id).toBeTruthy();
       });
+
       it('should return saved entity with param', async () => {
         const dto: any = {
           email: 'test@test.com',
@@ -467,6 +469,7 @@ describe('#crud-typeorm', () => {
         expect(res.body.id).toBeTruthy();
         expect(res.body.companyId).toBe(1);
       });
+
       it('should return with `returnShallow`', async () => {
         const dto: any = { description: 'returnShallow is true' };
         const res = await request(server).post('/devices').send(dto);
@@ -482,6 +485,7 @@ describe('#crud-typeorm', () => {
         const res = await request(server).post('/companies/bulk').send(dto);
         expect(res.status).toBe(400);
       });
+
       it('should return created entities', async () => {
         const dto = {
           bulk: [
@@ -508,29 +512,64 @@ describe('#crud-typeorm', () => {
         const res = await request(server).patch('/companies/333').send(dto);
         expect(res.status).toBe(404);
       });
+
       it('should return updated entity, 1', async () => {
         const dto = { name: 'updated0' };
         const res = await request(server).patch('/companies/1').send(dto);
         expect(res.status).toBe(200);
         expect(res.body.name).toBe('updated0');
       });
+
       it('should return updated entity, 2', async () => {
+        const resp = await request(server)
+          .post('/companies/1/users')
+          .send({
+            companyId: 1,
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: faker.person.lastName(),
+            },
+          })
+          .expect(201);
+
         const dto = { isActive: false, companyId: 5 };
-        const res = await request(server).patch('/companies/1/users/22').send(dto);
+        const res = await request(server)
+          .patch(`/companies/1/users/${resp.body.id}`)
+          .send(dto);
+
         expect(res.status).toBe(200);
         expect(res.body.isActive).toBe(false);
         expect(res.body.companyId).toBe(1);
       });
+
       it('should not return cached value while patching', async () => {
         const dto = { name: { first: 'nameHasBeenPatched' } };
-        const updateUser = () => request(server).patch('/companies/2/users/17').send(dto);
+        const currentName = faker.person.firstName();
+
+        const resp = await request(server)
+          .post('/companies/2/users')
+          .send({
+            companyId: 1,
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: currentName,
+              last: faker.person.lastName(),
+            },
+          })
+          .expect(201);
+
+        const updateUser = () =>
+          request(server).patch(`/companies/2/users/${resp.body.id}`).send(dto);
 
         const query = qb.select(['name.first']).query();
         const getUserCachedAfterUpdate = () =>
-          request(server).get('/companies/2/users/17').query(query);
+          request(server).get(`/companies/2/users/${resp.body.id}`).query(query);
 
         const resBeforeUpdateGetUser = await getUserCachedAfterUpdate().expect(200);
-        expect(resBeforeUpdateGetUser.body.name.first).toBe(null);
+        expect(resBeforeUpdateGetUser.body.name.first).toBe(currentName);
 
         const resUpdateUser = await updateUser().expect(200);
         expect(resUpdateUser.body.name.first).toBe('nameHasBeenPatched');
@@ -538,16 +577,33 @@ describe('#crud-typeorm', () => {
         const resGetUser = await getUserCachedAfterUpdate().expect(200);
         expect(resGetUser.body.name.first).toBe('nameHasBeenPatched');
       });
+
       it('should not return cached value while updating', async () => {
         const dto = { name: { last: 'nameHasBeenUpdated' } };
-        const updateUser = () => request(server).put('/companies/2/users/17').send(dto);
+        const currentName = faker.person.firstName();
+
+        const resp = await request(server)
+          .post('/companies/2/users')
+          .send({
+            companyId: 1,
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: currentName,
+            },
+          })
+          .expect(201);
+
+        const updateUser = () =>
+          request(server).put(`/companies/2/users/${resp.body.id}`).send(dto);
 
         const query = qb.select(['name.last']).query();
         const getUserCachedAfterUpdate = () =>
-          request(server).get('/companies/2/users/17').query(query);
+          request(server).get(`/companies/2/users/${resp.body.id}`).query(query);
 
         const resBeforeUpdateGetUser = await getUserCachedAfterUpdate().expect(200);
-        expect(resBeforeUpdateGetUser.body.name.last).toBe(null);
+        expect(resBeforeUpdateGetUser.body.name.last).toBe(currentName);
 
         const resUpdateUser = await updateUser().expect(200);
         expect(resUpdateUser.body.name.last).toBe('nameHasBeenUpdated');
@@ -577,27 +633,85 @@ describe('#crud-typeorm', () => {
         const res = await request(server).delete('/companies/3333');
         expect(res.status).toBe(404);
       });
+
       it('should softly delete entity', async () => {
-        const res = await request(server).delete('/companies/5');
+        const resp = await request(server)
+          .post('/companies')
+          .send({
+            name: faker.company.name(),
+            domain: faker.internet.domainName(),
+            description: faker.lorem.sentence(),
+          })
+          .expect(201);
+
+        const res = await request(server).delete(`/companies/${resp.body.id}`);
         expect(res.status).toBe(200);
       });
+
       it('should not return softly deleted entity', async () => {
-        const res = await request(server).get('/companies/5');
+        const resp = await request(server)
+          .post('/companies')
+          .send({
+            name: faker.company.name(),
+            domain: faker.internet.domainName(),
+            description: faker.lorem.sentence(),
+          })
+          .expect(201);
+
+        await request(server).delete(`/companies/${resp.body.id}`);
+
+        const res = await request(server).get(`/companies/${resp.body.id}`);
         expect(res.status).toBe(404);
       });
+
       it('should recover softly deleted entity', async () => {
-        const res = await request(server).patch('/companies/5/recover');
+        const resp = await request(server)
+          .post('/companies')
+          .send({
+            name: faker.company.name(),
+            domain: faker.internet.domainName(),
+            description: faker.lorem.sentence(),
+          })
+          .expect(201);
+
+        const res = await request(server).patch(`/companies/${resp.body.id}/recover`);
         expect(res.status).toBe(200);
       });
+
       it('should return recovered entity', async () => {
-        const res = await request(server).get('/companies/5');
+        const resp = await request(server)
+          .post('/companies')
+          .send({
+            name: faker.company.name(),
+            domain: faker.internet.domainName(),
+            description: faker.lorem.sentence(),
+          })
+          .expect(201);
+
+        await request(server).patch(`/companies/${resp.body.id}/recover`).expect(200);
+
+        const res = await request(server).get(`/companies/${resp.body.id}`);
         expect(res.status).toBe(200);
-        expect(res.body.id).toBe(5);
+        expect(res.body.id).toBe(resp.body.id);
       });
+
       it('should return deleted entity', async () => {
-        const res = await request(server).delete('/companies/1/users/22');
+        const resp = await request(server)
+          .post('/companies/1/users')
+          .send({
+            companyId: faker.number.int({ min: 1, max: 50 }),
+            isActive: faker.datatype.boolean(),
+            email: faker.internet.email(),
+            name: {
+              first: faker.person.firstName(),
+              last: faker.person.lastName(),
+            },
+          })
+          .expect(201);
+
+        const res = await request(server).delete(`/companies/1/users/${resp.body.id}`);
         expect(res.status).toBe(200);
-        expect(res.body.id).toBe(22);
+        expect(res.body.id).toBe(resp.body.id);
         expect(res.body.companyId).toBe(1);
       });
     });
