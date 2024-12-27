@@ -36,6 +36,9 @@
     "name": "n4it",
     "email": "hello@n4it.nl"
   },
+  "dependencies": {
+    "@n4it/crud": "^1.0.0"
+  },
   "scripts": {
     "build": "npx tsc -b"
   }
