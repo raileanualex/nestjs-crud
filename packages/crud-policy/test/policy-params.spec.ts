@@ -6,13 +6,12 @@ import { createNestMockServer } from './common';
 jest.setTimeout(60000);
 
 describe('#crud-policy', () => {
- 
   describe('#top level manage default policies', () => {
     let app: INestApplication;
     let server: any;
 
     beforeAll(async () => {
-      const nestMockServer = await createNestMockServer(["user:m"]);
+      const nestMockServer = await createNestMockServer(['user:m']);
       app = nestMockServer.app;
       server = nestMockServer.server;
     });
@@ -32,23 +31,23 @@ describe('#crud-policy', () => {
             first: faker.person.firstName(),
             last: faker.person.lastName(),
           },
-        }).expect(201);
+        })
+        .expect(201);
 
-        await request(server)
-          .put(`/users/${resp.body.id}`)
-          .send({
-            companyId: faker.number.int({ min: 1, max: 10 }),
-            isActive: faker.datatype.boolean(),
-            email: faker.internet.email(),
-            name: {
-              first: faker.person.firstName(),
-              last: faker.person.lastName(),
-            },
-          }).expect(200);
+      await request(server)
+        .put(`/users/${resp.body.id}`)
+        .send({
+          companyId: faker.number.int({ min: 1, max: 10 }),
+          isActive: faker.datatype.boolean(),
+          email: faker.internet.email(),
+          name: {
+            first: faker.person.firstName(),
+            last: faker.person.lastName(),
+          },
+        })
+        .expect(200);
 
-        await request(server)
-          .delete(`/users/${resp.body.id}`)
-          .expect(200);
+      await request(server).delete(`/users/${resp.body.id}`).expect(200);
     });
   });
 
@@ -57,7 +56,7 @@ describe('#crud-policy', () => {
     let server: any;
 
     beforeAll(async () => {
-      const nestMockServer = await createNestMockServer(["user:w"]);
+      const nestMockServer = await createNestMockServer(['user:w']);
       app = nestMockServer.app;
       server = nestMockServer.server;
     });
@@ -77,7 +76,8 @@ describe('#crud-policy', () => {
             first: faker.person.firstName(),
             last: faker.person.lastName(),
           },
-        }).expect(201);
+        })
+        .expect(201);
 
       await request(server)
         .patch(`/users/${resp.body.id}`)
@@ -89,7 +89,8 @@ describe('#crud-policy', () => {
             first: faker.person.firstName(),
             last: faker.person.lastName(),
           },
-        }).expect(200);
+        })
+        .expect(200);
     });
 
     it('should not be able to manage any user', async () => {
@@ -103,7 +104,8 @@ describe('#crud-policy', () => {
             first: faker.person.firstName(),
             last: faker.person.lastName(),
           },
-        }).expect(201);
+        })
+        .expect(201);
 
       await request(server)
         .put(`/users/${resp.body.id}`)
@@ -115,11 +117,10 @@ describe('#crud-policy', () => {
             first: faker.person.firstName(),
             last: faker.person.lastName(),
           },
-        }).expect(403);
-
-      await request(server)
-        .delete(`/users/${resp.body.id}`)
+        })
         .expect(403);
+
+      await request(server).delete(`/users/${resp.body.id}`).expect(403);
     });
 
     it('should be able to read any user', async () => {
@@ -133,15 +134,12 @@ describe('#crud-policy', () => {
             first: faker.person.firstName(),
             last: faker.person.lastName(),
           },
-        }).expect(201);
+        })
+        .expect(201);
 
-      await request(server)
-        .get(`/users/${resp.body.id}`)
-        .expect(200);
+      await request(server).get(`/users/${resp.body.id}`).expect(200);
 
-      await request(server)
-        .get('/users')
-        .expect(200);
+      await request(server).get('/users').expect(200);
     });
   });
 
@@ -150,7 +148,7 @@ describe('#crud-policy', () => {
     let server: any;
 
     beforeAll(async () => {
-      const nestMockServer = await createNestMockServer(["user:r"]);
+      const nestMockServer = await createNestMockServer(['user:r']);
       app = nestMockServer.app;
       server = nestMockServer.server;
     });
@@ -170,7 +168,8 @@ describe('#crud-policy', () => {
             first: faker.person.firstName(),
             last: faker.person.lastName(),
           },
-        }).expect(403);
+        })
+        .expect(403);
 
       await request(server)
         .patch(`/users/${resp.body.id}`)
@@ -182,7 +181,8 @@ describe('#crud-policy', () => {
             first: faker.person.firstName(),
             last: faker.person.lastName(),
           },
-        }).expect(403);
+        })
+        .expect(403);
     });
 
     it('should not be able to manage any user', async () => {
@@ -196,7 +196,8 @@ describe('#crud-policy', () => {
             first: faker.person.firstName(),
             last: faker.person.lastName(),
           },
-        }).expect(403);
+        })
+        .expect(403);
 
       await request(server)
         .put(`/users/${resp.body.id}`)
@@ -208,17 +209,14 @@ describe('#crud-policy', () => {
             first: faker.person.firstName(),
             last: faker.person.lastName(),
           },
-        }).expect(403);
-
-      await request(server)
-        .delete(`/users/${resp.body.id}`)
+        })
         .expect(403);
+
+      await request(server).delete(`/users/${resp.body.id}`).expect(403);
     });
 
     it('should be able to read any user', async () => {
-      await request(server)
-        .get('/users')
-        .expect(200);
+      await request(server).get('/users').expect(200);
     });
   });
 });

@@ -6,7 +6,11 @@ import type { DtoOptions } from '../interfaces';
 // this function is a hack to create a unique class name
 // this is needed because NestJS uses class prototype to store metadata
 // and if we use the same base class in multiple places, the metadata will be overwritten
-export const createUniqueClassWithDefaults = <T>(cls: Type<T>, action: string, defaults: Partial<T>) => {
+export const createUniqueClassWithDefaults = <T>(
+  cls: Type<T>,
+  action: string,
+  defaults: Partial<T>,
+) => {
   const uniqueClassName = `${cls.name}_${randomUUID().replace(/-/g, '_')}`;
   const defaultEntries = Object.entries(defaults);
 

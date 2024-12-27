@@ -30,7 +30,7 @@ export const createNestMockServer = async (policies: string[]) => {
   })
   @Controller('/users')
   class UsersController {
-    constructor(public service: UsersService) { }
+    constructor(public service: UsersService) {}
   }
 
   const fixture = await Test.createTestingModule({
@@ -39,10 +39,14 @@ export const createNestMockServer = async (policies: string[]) => {
       TypeOrmModule.forFeature([User]),
     ],
     controllers: [UsersController],
-    providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }, UsersService, {
-      provide: APP_GUARD,
-      useClass: AuthGuardMock,
-    }],
+    providers: [
+      { provide: APP_FILTER, useClass: HttpExceptionFilter },
+      UsersService,
+      {
+        provide: APP_GUARD,
+        useClass: AuthGuardMock,
+      },
+    ],
   }).compile();
 
   const app = fixture.createNestApplication();
@@ -51,4 +55,4 @@ export const createNestMockServer = async (policies: string[]) => {
   const server = app.getHttpServer();
 
   return { app, server };
-}
+};

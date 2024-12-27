@@ -1,10 +1,10 @@
-import { UnauthorizedException } from "@nestjs/common";
+import { UnauthorizedException } from '@nestjs/common';
 
 export type GetIdFromBody = (body: Record<string, string>) => string | number | null;
 export type GetIdFromParams = (params: Record<string, string>) => string | number | null;
 
 export enum Error {
-  ID_MISMATCH = "Requested id does not match",
+  ID_MISMATCH = 'Requested id does not match',
 }
 
 export const isSameIdInBodyAndParams = (

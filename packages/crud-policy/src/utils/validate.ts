@@ -1,15 +1,7 @@
-import { PolicyActions } from "../constants";
-import { Policy } from "../types";
-import {
-  isReadOrWriteAction,
-  isReadAction,
-  isManageAction,
-} from "./is";
-import {
-  createManagePolicy,
-  createReadPolicy,
-  createWritePolicy,
-} from "./make-policy";
+import { PolicyActions } from '../constants';
+import { Policy } from '../types';
+import { isReadOrWriteAction, isReadAction, isManageAction } from './is';
+import { createManagePolicy, createReadPolicy, createWritePolicy } from './make-policy';
 
 export const validatePolicyWildcard = (
   userPolicies: string[],
@@ -51,13 +43,7 @@ export const validatePolicies = (
 ) => {
   return requiredPolicies.every(({ action, name }) => {
     // wild card check on top of the policy
-    if (
-      validatePolicyWildcard(
-        userPolicies,
-        name.split(".")[0],
-        action,
-      )
-    ) {
+    if (validatePolicyWildcard(userPolicies, name.split('.')[0], action)) {
       return true;
     }
 
@@ -69,21 +55,13 @@ export const validatePolicies = (
     // check wild card check on top of the policy with entity id
     if (
       entityId &&
-      validatePolicyWildcard(
-        userPolicies,
-        name.split(".")[0],
-        action,
-        entityId,
-      )
+      validatePolicyWildcard(userPolicies, name.split('.')[0], action, entityId)
     ) {
       return true;
     }
 
     // check on exact userbound policy
-    if (
-      entityId &&
-      validatePolicyWildcard(userPolicies, name, action, entityId)
-    ) {
+    if (entityId && validatePolicyWildcard(userPolicies, name, action, entityId)) {
       return true;
     }
 

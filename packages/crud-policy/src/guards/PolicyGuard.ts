@@ -3,12 +3,12 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-} from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { POLICY_NAME_METADATA } from "../constants";
-import { PoliciesGuardOpts, Policy } from "../types";
-import { validatePolicies } from "../utils/validate";
-import { createRequestEntityIdGetter } from "../utils/get-relevant-id";
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { POLICY_NAME_METADATA } from '../constants';
+import { PoliciesGuardOpts, Policy } from '../types';
+import { validatePolicies } from '../utils/validate';
+import { createRequestEntityIdGetter } from '../utils/get-relevant-id';
 
 const createGetAndValidateResourceId = (opts: PoliciesGuardOpts) => {
   if (!opts.extractors) {
@@ -17,18 +17,15 @@ const createGetAndValidateResourceId = (opts: PoliciesGuardOpts) => {
 
   const { getResourceIdFromBody, getResourceIdFromParams } = opts.extractors;
 
-  return createRequestEntityIdGetter(
-    getResourceIdFromBody,
-    getResourceIdFromParams,
-  );
-}
+  return createRequestEntityIdGetter(getResourceIdFromBody, getResourceIdFromParams);
+};
 
 export const createPolicyGuard = (opts: PoliciesGuardOpts) => {
   const getAndValidateResourceId = createGetAndValidateResourceId(opts);
 
   @Injectable()
   class PolicyGuard implements CanActivate {
-    constructor(public reflector: Reflector) { }
+    constructor(public reflector: Reflector) {}
 
     canActivate(context: ExecutionContext): boolean {
       const requiredPolicies = this.reflector.getAllAndOverride<Policy[]>(

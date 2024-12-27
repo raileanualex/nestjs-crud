@@ -1,4 +1,4 @@
-import { PolicyActions } from "../constants";
+import { PolicyActions } from '../constants';
 
 export const makePolicy =
   (action: PolicyActions) => (entity: string, entityId?: string | number) => {
