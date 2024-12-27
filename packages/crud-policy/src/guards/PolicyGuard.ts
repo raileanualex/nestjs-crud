@@ -6,10 +6,26 @@ import {
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { POLICY_NAME_METADATA } from "../constants";
-import { GetResourceIdFromReq, Policy } from "../types";
+import { PoliciesGuardOpts, Policy } from "../types";
 import { validatePolicies } from "../utils/validate";
+import { createRequestEntityIdGetter } from "../utils/get-relevant-id";
 
-export const createPolicyGuard = (getEntityId?: GetResourceIdFromReq) => {
+const createGetAndValidateResourceId = (opts: PoliciesGuardOpts) => {
+  if (!opts.extractors) {
+    return () => null;
+  }
+
+  const { getResourceIdFromBody, getResourceIdFromParams } = opts.extractors;
+
+  return createRequestEntityIdGetter(
+    getResourceIdFromBody,
+    getResourceIdFromParams,
+  );
+}
+
+export const createPolicyGuard = (opts: PoliciesGuardOpts) => {
+  const getAndValidateResourceId = createGetAndValidateResourceId(opts);
+
   @Injectable()
   class PolicyGuard implements CanActivate {
     constructor(public reflector: Reflector) { }
@@ -26,11 +42,11 @@ export const createPolicyGuard = (getEntityId?: GetResourceIdFromReq) => {
 
       const { user, params, body } = context.switchToHttp().getRequest();
 
-      const entityId = getEntityId?.(params, body);
+      const entityId = getAndValidateResourceId(params, body);
 
       const isAllowed = validatePolicies(
         requiredPolicies,
-        user.policies,
+        user[opts.userPolicyField] ?? [],
         entityId,
       );
 

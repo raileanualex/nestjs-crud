@@ -8,12 +8,20 @@ export type Policy = {
 
 export type PoliciesGuardOpts = {
   routes?: {
-    [K in BaseRouteName]?: Policy[];
+    [K in BaseRouteName]?: PolicyActions[];
   };
-  getResourceIdFromReq?: GetResourceIdFromReq;
+  policyName: string;
+  userPolicyField: string;
+  extractors?: {
+    getResourceIdFromBody: GetResourceIdFromBody;
+    getResourceIdFromParams: GetResourceIdFromParams;
+  }
 };
 
-export type GetResourceIdFromReq = (
+export type GetResourceIdFromParams = (
   params: Record<string, string | number>,
+) => string | number;
+
+export type GetResourceIdFromBody = (
   body: Record<string, string | number>,
 ) => string | number;
