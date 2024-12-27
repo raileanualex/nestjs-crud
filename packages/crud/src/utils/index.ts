@@ -6,11 +6,11 @@ import type { DtoOptions } from '../interfaces';
 // this function is a hack to create a unique class name
 // this is needed because NestJS uses class prototype to store metadata
 // and if we use the same base class in multiple places, the metadata will be overwritten
-export const createUniqueClassWithDefaults = <T>(cls: Type<T>, defaults: Partial<T>) => {
+export const createUniqueClassWithDefaults = <T>(cls: Type<T>, action: string, defaults: Partial<T>) => {
   const uniqueClassName = `${cls.name}_${randomUUID().replace(/-/g, '_')}`;
   const defaultEntries = Object.entries(defaults);
 
-  return new Function(
+  const newCls = new Function(
     'cls',
     'defaults',
     `
@@ -24,6 +24,13 @@ export const createUniqueClassWithDefaults = <T>(cls: Type<T>, defaults: Partial
     };
   `,
   )(cls, defaultEntries);
+
+  Object.defineProperty(newCls, 'name', {
+    writable: false,
+    value: `${action}Dto`,
+  });
+
+  return newCls as Type<T & typeof defaults>;
 };
 
 export type DtoDecorator<T> = {
@@ -43,14 +50,17 @@ export const createCrudDtoDecorators = <T>(
   return {
     create: createUniqueClassWithDefaults(
       OmitType(classRef, keysToOmitOnCreate),
+      classRef.name + 'Create',
       defaults,
     ),
     update: createUniqueClassWithDefaults(
       OmitType(classRef, [...keysToOmitOnCreate, ...keysToOmitOnUpdate]),
+      classRef.name + 'Update',
       defaults,
     ),
     replace: createUniqueClassWithDefaults(
       OmitType(classRef, keysToOmitOnCreate),
+      classRef.name + 'Replace',
       defaults,
     ),
   };

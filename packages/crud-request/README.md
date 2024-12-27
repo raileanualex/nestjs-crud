@@ -4,24 +4,22 @@
 <div align="center">
   <strong>for RESTful APIs built with NestJs</strong>
 </div>
+<br/>
+<div align="center">
+  <img src="https://gravatar.com/avatar/c27e8ebbf92f687180aa0f13dab9a0b1?size=256" alt="Logo n4it" style="border-radius:100%"/>
+</div>
 
 <br />
 
 <div align="center">
-  <a href="https://travis-ci.org/gid-oss/dataui-nestjs-crud">
-    <img src="https://github.com/gid-oss/dataui-nestjs-crud/workflows/Tests/badge.svg" alt="Build" />
+  <a href="https://github.com/nest4it/nestjs-crud/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/nest4it/nestjs-crud.svg" alt="License" />
   </a>
-  <a href="https://coveralls.io/github/gid-oss/dataui-nestjs-crud?branch=master">
-    <img src="https://coveralls.io/repos/github/gid-oss/dataui-nestjs-crud/badge.svg" alt="Coverage" />
+  <a href="https://www.npmjs.com/package/@n4it/crud">
+    <img src="https://img.shields.io/npm/v/@n4it/crud.svg" alt="npm version" />
   </a>
-  <a href="https://github.com/gid-oss/dataui-nestjs-crud/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/gid-oss/dataui-nestjs-crud.svg" alt="License" />
-  </a>
-  <a href="https://www.npmjs.com/package/@dataui/crud">
-    <img src="https://img.shields.io/npm/v/@dataui/crud.svg" alt="npm version" />
-  </a>
-  <a href="https://www.npmjs.com/org/nestjsx">
-    <img src="https://img.shields.io/npm/dm/@dataui/crud.svg" alt="npm downloads" />
+  <a href="https://www.npmjs.com/org/n4it">
+    <img src="https://img.shields.io/npm/dm/@n4it/crud.svg" alt="npm downloads" />
   </a>
   <a href="https://renovatebot.com/">
     <img src="https://img.shields.io/badge/renovate-enabled-brightgreen.svg" alt="Renovate" />
@@ -29,21 +27,13 @@
   <a href="http://makeapullrequest.com">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs welcome" />
   </a>
-  <a href="https://github.com/marmelab/awesome-rest#nodejs">
-    <img src="https://raw.githubusercontent.com/gid-oss/dataui-nestjs-crud/master/img/awesome-rest.svg?sanitize=true" alt="Awesome REST" />
-  </a>
-  <a href="https://github.com/juliandavidmr/awesome-nestjs#components--libraries">
-    <img src="https://raw.githubusercontent.com/gid-oss/dataui-nestjs-crud/master/img/awesome-nest.svg?sanitize=true" alt="Awesome Nest" />
-  </a>
-  <a href="https://github.com/nestjs/nest">
-    <img src="https://raw.githubusercontent.com/gid-oss/dataui-nestjs-crud/master/img/nest-powered.svg?sanitize=true" alt="Nest Powered" />
-  </a>
 </div>
 
 <div align="center">
   <sub>Built by
   <a href="https://twitter.com/MichaelYali">@MichaelYali</a> and
-  <a href="https://github.com/gid-oss/dataui-nestjs-crud/graphs/contributors">
+  <a href="https://n4it.nl">n4it</a> and
+  <a href="https://github.com/nest4it/nestjs-crud/graphs/contributors">
     Contributors
   </a>
 </div>
@@ -102,14 +92,13 @@ Any support is welcome. At least you can give us a star.
 ### Code Contributors
 
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://github.com/dataui/crud/graphs/contributors"><img src="https://opencollective.com/nestjsx/contributors.svg?width=890&button=false" /></a>
 
 ### Financial Contributors
 
 #### Organizations
 
-Currently this project is NOT sponsored by anybody. Get in touch if you want to become a sponsor.
+Currently this project is sponsored and maintained by N4IT. Get in touch if you want to become a sponsor.
 
 ## License
 
-[MIT](LICENSE)
+[GPL-3.0](LICENSE)

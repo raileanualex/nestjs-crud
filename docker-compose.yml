@@ -1,7 +1,4 @@
-version: '3'
-
-networks:
-  nestjsx_crud:
+version: '3.8'
 
 services:
   postgres:
@@ -12,8 +9,6 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
       POSTGRES_DB: nestjsx_crud
-    networks:
-      - nestjsx_crud
 
   mysql:
     platform: linux/x86_64
@@ -30,11 +25,3 @@ services:
       nofile:
         soft: 20000
         hard: 40000
-
-  redis:
-    image: redis:alpine
-    ports:
-      - 6379:6379
-    command: redis-server
-    networks:
-      - nestjsx_crud

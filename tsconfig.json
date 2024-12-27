@@ -19,10 +19,12 @@
       "@n4it/crud-typeorm": ["crud-typeorm/src"],
       "@n4it/crud-request": ["crud-request/src"],
       "@n4it/crud-util": ["crud-util/src"],
+      "@n4it/crud-policy": ["crud-policy/src"],
       "@n4it/crud/*": ["crud/src/*"],
       "@n4it/crud-typeorm/*": ["crud-typeorm/src/*"],
       "@n4it/crud-request/*": ["crud-request/src/*"],
-      "@n4it/crud-util/*": ["crud-util/src/*"]
+      "@n4it/crud-util/*": ["crud-util/src/*"],
+      "@n4it/crud-policy/*": ["crud-policy/src/*"]
     }
   }
 }

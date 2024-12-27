@@ -1,12 +1,12 @@
 import { RequestMethod } from '@nestjs/common';
 
-export const FEATURE_NAME_METADATA = 'NESTJSX_FEATURE_NAME_METADATA';
-export const ACTION_NAME_METADATA = 'NESTJSX_ACTION_NAME_METADATA';
-export const OVERRIDE_METHOD_METADATA = 'NESTJSX_OVERRIDE_METHOD_METADATA';
-export const PARSED_BODY_METADATA = 'NESTJSX_PARSED_BODY_METADATA';
-export const PARSED_CRUD_REQUEST_KEY = 'NESTJSX_PARSED_CRUD_REQUEST_KEY';
-export const CRUD_OPTIONS_METADATA = 'NESTJSX_CRUD_OPTIONS_METADATA';
-export const CRUD_AUTH_OPTIONS_METADATA = 'NESTJSX_CRUD_AUTH_OPTIONS_METADATA';
+export const FEATURE_NAME_METADATA = 'N4IT_FEATURE_NAME_METADATA';
+export const ACTION_NAME_METADATA = 'N4IT_ACTION_NAME_METADATA';
+export const OVERRIDE_METHOD_METADATA = 'N4IT_OVERRIDE_METHOD_METADATA';
+export const PARSED_BODY_METADATA = 'N4IT_PARSED_BODY_METADATA';
+export const PARSED_CRUD_REQUEST_KEY = 'N4IT_PARSED_CRUD_REQUEST_KEY';
+export const CRUD_OPTIONS_METADATA = 'N4IT_CRUD_OPTIONS_METADATA';
+export const CRUD_AUTH_OPTIONS_METADATA = 'N4IT_CRUD_AUTH_OPTIONS_METADATA';
 
 export enum CrudActions {
   ReadAll = 'Read-All',
@@ -34,6 +34,17 @@ export enum BaseRouteName {
   deleteOneBase = 'deleteOneBase',
   recoverOneBase = 'recoverOneBase',
 }
+
+export const crudAuthActionsMap = new Map<BaseRouteName, CrudActions>([
+  [BaseRouteName.getManyBase, CrudActions.ReadAll],
+  [BaseRouteName.getOneBase, CrudActions.ReadOne],
+  [BaseRouteName.createManyBase, CrudActions.CreateMany],
+  [BaseRouteName.createOneBase, CrudActions.CreateOne],
+  [BaseRouteName.updateOneBase, CrudActions.UpdateOne],
+  [BaseRouteName.deleteOneBase, CrudActions.DeleteOne],
+  [BaseRouteName.replaceOneBase, CrudActions.ReplaceOne],
+  [BaseRouteName.recoverOneBase, CrudActions.RecoverOne],
+]);
 
 export const getRouteSchema = () => [
   {
@@ -101,14 +112,3 @@ export const getRouteSchema = () => [
     withParams: true,
   },
 ];
-
-export const crudAuthActionsMap = new Map<BaseRouteName, CrudActions>([
-  [BaseRouteName.getManyBase, CrudActions.ReadAll],
-  [BaseRouteName.getOneBase, CrudActions.ReadOne],
-  [BaseRouteName.createManyBase, CrudActions.CreateMany],
-  [BaseRouteName.createOneBase, CrudActions.CreateOne],
-  [BaseRouteName.updateOneBase, CrudActions.UpdateOne],
-  [BaseRouteName.deleteOneBase, CrudActions.DeleteOne],
-  [BaseRouteName.replaceOneBase, CrudActions.ReplaceOne],
-  [BaseRouteName.recoverOneBase, CrudActions.RecoverOne],
-]);

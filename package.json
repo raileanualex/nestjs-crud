@@ -2,7 +2,7 @@
   "name": "@n4it/nestjs-crud",
   "version": "1.0.0",
   "description": "Nest CRUD for RESTful APIs",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "workspaces": [
     "packages/*"
   ],
@@ -64,7 +64,6 @@
     "supertest": "7.0.0",
     "pg": "8.13.1",
     "mysql2": "3.11.5",
-    "redis": "4.7.0",
     "typeorm-extension": "3.6.3",
     "@faker-js/faker": "9.3.0"
   },
