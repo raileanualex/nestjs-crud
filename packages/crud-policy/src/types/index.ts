@@ -1,12 +1,12 @@
-import { BaseRouteName } from '@n4it/crud';
-import { PolicyActions } from '../constants';
+import type { BaseRouteName } from '@n4it/crud';
+import type { PolicyActions } from '../constants';
 
 export type Policy = {
   name: string;
   action: PolicyActions;
 };
 
-export type PoliciesGuardOpts = {
+export type PolicyGuardOpts = {
   routes?: {
     [K in BaseRouteName]?: PolicyActions[];
   };
@@ -19,9 +19,9 @@ export type PoliciesGuardOpts = {
 };
 
 export type GetResourceIdFromParams = (
-  params: Record<string, string | number>,
-) => string | number;
+  params: Record<string, unknown>,
+) => unknown;
 
 export type GetResourceIdFromBody = (
-  body: Record<string, string | number>,
-) => string | number;
+  body: Record<string, unknown>,
+) => unknown;

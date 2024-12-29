@@ -1,15 +1,13 @@
 import { UnauthorizedException } from '@nestjs/common';
-
-export type GetIdFromBody = (body: Record<string, string>) => string | number | null;
-export type GetIdFromParams = (params: Record<string, string>) => string | number | null;
+import type { GetResourceIdFromBody, GetResourceIdFromParams } from '../types';
 
 export enum Error {
   ID_MISMATCH = 'Requested id does not match',
 }
 
 export const isSameIdInBodyAndParams = (
-  bodyId: string | number | null,
-  paramsId: string | number | null,
+  bodyId: unknown,
+  paramsId: unknown,
 ) => {
   if (bodyId && paramsId && bodyId !== paramsId) {
     return false;
@@ -19,10 +17,10 @@ export const isSameIdInBodyAndParams = (
 };
 
 export const createRequestEntityIdGetter = (
-  getIdFromBody: GetIdFromBody,
-  getIdFromParams: GetIdFromParams,
+  getIdFromBody: GetResourceIdFromBody,
+  getIdFromParams: GetResourceIdFromParams,
 ) => {
-  return (params: Record<string, string>, body: Record<string, string>) => {
+  return (params: Record<string, unknown>, body: Record<string, unknown>) => {
     const idFromBody = getIdFromBody(body);
     const idFromParams = getIdFromParams(params);
 

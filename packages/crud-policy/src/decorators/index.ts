@@ -1,14 +1,14 @@
 import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common';
 import { POLICY_NAME_METADATA, PolicyActions } from '../constants';
-import type { PoliciesGuardOpts, Policy } from '../types';
-import { createPolicyGuard } from '../guards/PolicyGuard';
+import type { PolicyGuardOpts, Policy } from '../types';
+import { createPolicyGuard } from '../guards/utils';
 import { BaseRouteName } from '@n4it/crud';
 
 export const Policies = (...policies: Policy[]) =>
   SetMetadata(POLICY_NAME_METADATA, policies);
 
-const createDefaultPolicies = (
-  opts: PoliciesGuardOpts,
+export const createDefaultPolicies = (
+  opts: PolicyGuardOpts,
 ): {
   [K in keyof typeof BaseRouteName]?: Policy[];
 } => ({
@@ -22,10 +22,10 @@ const createDefaultPolicies = (
   recoverOneBase: [{ name: opts.policyName, action: PolicyActions.Manage }],
 });
 
-const enhanceCrudTarget = (options: PoliciesGuardOpts, target: any) => {
+export const enhanceCrudTarget = (opts: PolicyGuardOpts, target: any) => {
   const methods = Object.getOwnPropertyNames(target.prototype);
 
-  const routes = options.routes ?? createDefaultPolicies(options);
+  const routes = opts.routes ?? createDefaultPolicies(opts);
 
   methods.forEach((methodName) => {
     const policies = routes[methodName];
@@ -36,7 +36,7 @@ const enhanceCrudTarget = (options: PoliciesGuardOpts, target: any) => {
   });
 };
 
-export const CrudPolicies = (options: PoliciesGuardOpts) => (target: any) => {
-  enhanceCrudTarget(options, target);
-  applyDecorators(UseGuards(createPolicyGuard(options)))(target);
+export const CrudPolicies = (opts: PolicyGuardOpts) => (target: any) => {
+  enhanceCrudTarget(opts, target);
+  applyDecorators(UseGuards(createPolicyGuard(opts)))(target);
 };
