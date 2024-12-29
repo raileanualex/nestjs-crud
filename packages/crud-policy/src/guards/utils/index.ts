@@ -16,7 +16,9 @@ export const createGetAndValidateResourceId = (
   return createRequestEntityIdGetter(getResourceIdFromBody, getResourceIdFromParams);
 };
 
-export const createPolicyGuard = (opts: PolicyGuardOpts) => {
+export const createPolicyGuard = (
+  opts: Pick<PolicyGuardOpts, 'extractors' | 'userPolicyField'>,
+) => {
   @Injectable()
   class PolicyGuard extends BasePolicyGuard {
     constructor(public reflector: Reflector) {
