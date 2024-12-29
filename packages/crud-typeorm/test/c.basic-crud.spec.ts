@@ -329,10 +329,13 @@ describe('#crud-typeorm', () => {
       it('should return an array of all entities', async () => {
         const res = await request(server).get('/companies?include_deleted=1');
         expect(res.status).toBe(200);
-        expect(res.body).not.toEqual(
+        expect(res.body).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
               deletedAt: expect.any(String),
+            }),
+            expect.objectContaining({
+              deletedAt: null,
             }),
           ]),
         );
@@ -445,7 +448,7 @@ describe('#crud-typeorm', () => {
       it('should return saved entity', async () => {
         const dto = {
           name: 'test0',
-          domain: 'test0',
+          domain: faker.internet.domainName(),
         };
         const res = await request(server).post('/companies').send(dto);
         expect(res.status).toBe(201);
@@ -491,11 +494,11 @@ describe('#crud-typeorm', () => {
           bulk: [
             {
               name: 'test1',
-              domain: 'test1',
+              domain: faker.internet.domainName(),
             },
             {
               name: 'test2',
-              domain: 'test2',
+              domain: faker.internet.domainName(),
             },
           ],
         };
