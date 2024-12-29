@@ -19,11 +19,7 @@ export class BasePolicyGuard implements CanActivate {
       return true;
     }
 
-    const { user, params, body } = context.switchToHttp().getRequest();
-
-    const entityId = this.getAndValidateResourceId(params, body);
-
-    const isAllowed = this.hasCorrectPolicies(context, user[this.opts.userPolicyField] ?? [], entityId);
+    const isAllowed = this.hasCorrectPolicies(context);
 
     if (!isAllowed) {
       throw new ForbiddenException();
@@ -45,8 +41,11 @@ export class BasePolicyGuard implements CanActivate {
     })(params, body);
   }
 
-  public hasCorrectPolicies(context: ExecutionContext, userPolicies: string[], entityId: string | number) {
+  public hasCorrectPolicies(context: ExecutionContext) {
     const requiredPolicies = this.getRequiredPolicies(context);
-    return validatePolicies(requiredPolicies, userPolicies, entityId);
+    const { user, params, body } = context.switchToHttp().getRequest();
+    const entityId = this.getAndValidateResourceId(params, body);
+
+    return validatePolicies(requiredPolicies, user[this.opts.userPolicyField] ?? [], entityId);
   }
 }
