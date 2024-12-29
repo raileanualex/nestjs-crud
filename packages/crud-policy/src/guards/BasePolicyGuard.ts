@@ -21,7 +21,7 @@ export class BasePolicyGuard implements CanActivate {
 
     const { user, params, body } = context.switchToHttp().getRequest();
 
-    const entityId = this.getAndValidateResourceId(this.opts.extractors, params, body);
+    const entityId = this.getAndValidateResourceId(params, body);
 
     const isAllowed = this.hasCorrectPolicies(context, user[this.opts.userPolicyField] ?? [], entityId);
 
@@ -39,9 +39,9 @@ export class BasePolicyGuard implements CanActivate {
     );
   }
 
-  public getAndValidateResourceId(opts: Required<PolicyGuardOpts["extractors"]>, params: Record<string, string | number>, body: Record<string, string | number>) {
+  public getAndValidateResourceId(params: Record<string, unknown>, body: Record<string, unknown>) {
     return createGetAndValidateResourceId({
-      extractors: opts
+      extractors: this.opts.extractors,
     })(params, body);
   }
 
