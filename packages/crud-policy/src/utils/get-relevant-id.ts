@@ -5,10 +5,7 @@ export enum Error {
   ID_MISMATCH = 'Requested id does not match',
 }
 
-export const isSameIdInBodyAndParams = (
-  bodyId: unknown,
-  paramsId: unknown,
-) => {
+export const isSameIdInBodyAndParams = (bodyId: unknown, paramsId: unknown) => {
   if (bodyId && paramsId && bodyId !== paramsId) {
     return false;
   }

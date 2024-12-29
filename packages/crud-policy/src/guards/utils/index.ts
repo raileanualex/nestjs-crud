@@ -1,12 +1,12 @@
-import {
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { PolicyGuardOpts } from '../../types';
 import { createRequestEntityIdGetter } from '../../utils/get-relevant-id';
 import { BasePolicyGuard } from '../BasePolicyGuard';
 
-export const createGetAndValidateResourceId = (opts: Pick<PolicyGuardOpts, "extractors">) => {
+export const createGetAndValidateResourceId = (
+  opts: Pick<PolicyGuardOpts, 'extractors'>,
+) => {
   if (!opts.extractors) {
     return () => null;
   }
@@ -17,7 +17,6 @@ export const createGetAndValidateResourceId = (opts: Pick<PolicyGuardOpts, "extr
 };
 
 export const createPolicyGuard = (opts: PolicyGuardOpts) => {
-
   @Injectable()
   class PolicyGuard extends BasePolicyGuard {
     constructor(public reflector: Reflector) {

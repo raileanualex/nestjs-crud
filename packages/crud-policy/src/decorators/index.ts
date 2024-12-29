@@ -24,13 +24,17 @@ export const createDefaultPolicies = (
 
 export const enhanceCrudTarget = (opts: PolicyGuardOpts, target: any) => {
   const methods = Object.getOwnPropertyNames(target.prototype);
-
-  const routes = opts.routes ?? createDefaultPolicies(opts);
+  const defaultPolicies = createDefaultPolicies(opts);
+  const routes = { ...defaultPolicies, ...opts.routes };
 
   methods.forEach((methodName) => {
     const policies = routes[methodName];
 
-    if (!['constructor'].includes(methodName) && Array.isArray(policies)) {
+    if (
+      !['constructor'].includes(methodName) &&
+      Object.values(BaseRouteName).includes(methodName as BaseRouteName) &&
+      Array.isArray(policies)
+    ) {
       Policies(...policies)(target.prototype[methodName]);
     }
   });
