@@ -8,7 +8,7 @@ export const Policies = (...policies: Policy[]) =>
   SetMetadata(POLICY_NAME_METADATA, policies);
 
 export const createDefaultPolicies = (
-  opts: PolicyGuardOpts,
+  opts: Pick<PolicyGuardOpts, 'policyName'>,
 ): {
   [K in keyof typeof BaseRouteName]?: Policy[];
 } => ({
@@ -22,25 +22,25 @@ export const createDefaultPolicies = (
   recoverOneBase: [{ name: opts.policyName, action: PolicyActions.Manage }],
 });
 
-export const enhanceCrudTarget = (opts: PolicyGuardOpts, target: any) => {
-  const methods = Object.getOwnPropertyNames(target.prototype);
-  const defaultPolicies = createDefaultPolicies(opts);
-  const routes = { ...defaultPolicies, ...opts.routes };
+export const ApplyCrudPolicies =
+  (opts: Pick<PolicyGuardOpts, 'policyName' | 'routes'>) => (target: any) => {
+    const methods = Object.getOwnPropertyNames(target.prototype);
+    const defaultPolicies = createDefaultPolicies(opts);
+    const routes = { ...defaultPolicies, ...opts.routes };
 
-  methods.forEach((methodName) => {
-    const policies = routes[methodName];
+    methods.forEach((methodName) => {
+      const policies = routes[methodName];
 
-    if (
-      !['constructor'].includes(methodName) &&
-      Object.values(BaseRouteName).includes(methodName as BaseRouteName) &&
-      Array.isArray(policies)
-    ) {
-      Policies(...policies)(target.prototype[methodName]);
-    }
-  });
-};
+      if (
+        !['constructor'].includes(methodName) &&
+        Object.values(BaseRouteName).includes(methodName as BaseRouteName) &&
+        Array.isArray(policies)
+      ) {
+        Policies(...policies)(target.prototype[methodName]);
+      }
+    });
+  };
 
-export const CrudPolicies = (opts: PolicyGuardOpts) => (target: any) => {
-  enhanceCrudTarget(opts, target);
-  applyDecorators(UseGuards(createPolicyGuard(opts)))(target);
+export const CrudGuard = (opts: PolicyGuardOpts) => (target: any) => {
+  applyDecorators(ApplyCrudPolicies(opts), UseGuards(createPolicyGuard(opts)))(target);
 };

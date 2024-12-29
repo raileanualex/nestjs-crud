@@ -7,7 +7,7 @@ import { User } from '../../../integration/crud-typeorm/users';
 import { HttpExceptionFilter } from '../../../integration/shared/https-exception.filter';
 import { Crud } from '@n4it/crud';
 import { UsersService } from '../../../integration/crud-typeorm/users/users.service';
-import { CrudPolicies } from '../src';
+import { CrudGuard } from '../src';
 
 export const createNestMockServer = async (policies: string[]) => {
   const withCache = isPg ? postgresConfig : mySqlConfig;
@@ -21,7 +21,7 @@ export const createNestMockServer = async (policies: string[]) => {
     }
   }
 
-  @CrudPolicies({
+  @CrudGuard({
     policyName: 'user',
     userPolicyField: 'policies',
   })
