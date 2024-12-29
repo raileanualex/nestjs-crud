@@ -615,7 +615,7 @@ describe('#crud-typeorm', () => {
 
     describe('#replaceOneBase', () => {
       it('should create entity', async () => {
-        const dto = { name: 'updated0', domain: 'domain0' };
+        const dto = { name: 'updated0', domain: faker.internet.domainName() };
         const res = await request(server).put('/companies/333').send(dto);
         expect(res.status).toBe(200);
         expect(res.body.name).toBe('updated0');
