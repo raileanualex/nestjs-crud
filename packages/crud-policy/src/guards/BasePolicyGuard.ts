@@ -10,7 +10,7 @@ import { validatePolicies } from '../utils/validate';
 import { createGetAndValidateResourceId } from './utils';
 
 export class BasePolicyGuard implements CanActivate {
-  constructor(public reflector: Reflector, public opts: PolicyGuardOpts) { }
+  constructor(public reflector: Reflector, public opts: Pick<PolicyGuardOpts, "extractors" | "userPolicyField">) { }
 
   public canActivate(context: ExecutionContext): Promise<boolean> | boolean {
     const requiredPolicies = this.getRequiredPolicies(context);
