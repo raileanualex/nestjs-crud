@@ -12,7 +12,7 @@ import { createGetAndValidateResourceId } from './utils';
 export class BasePolicyGuard implements CanActivate {
   constructor(public reflector: Reflector, public opts: PolicyGuardOpts) { }
 
-  public canActivate(context: ExecutionContext) {
+  public canActivate(context: ExecutionContext): Promise<boolean> | boolean {
     const requiredPolicies = this.getRequiredPolicies(context);
 
     if (!requiredPolicies) {
