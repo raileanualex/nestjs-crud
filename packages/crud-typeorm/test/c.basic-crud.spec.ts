@@ -327,8 +327,6 @@ describe('#crud-typeorm', () => {
 
     describe('#getAllBase', () => {
       it('should return an array of all entities', async () => {
-        const res = await request(server).get('/companies?include_deleted=1');
-
         await request(server)
           .post('/companies')
           .send({
@@ -347,6 +345,8 @@ describe('#crud-typeorm', () => {
             deletedAt: new Date(),
           })
           .expect(201);
+
+        const res = await request(server).get('/companies?include_deleted=1');
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(
