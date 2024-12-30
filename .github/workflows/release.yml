@@ -16,15 +16,27 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
-
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: nestjsx_crud
+        ports:
+          - 5432:5432
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: nestjsx_crud
+          MYSQL_USER: nestjsx_crud
+          MYSQL_PASSWORD: nestjsx_crud
+          MYSQL_ROOT_PASSWORD: nestjsx_crud
+        ports:
+          - 3306:3306
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
-      - name: Run docker-compose
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        with:
-          up-flags: "-d"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
