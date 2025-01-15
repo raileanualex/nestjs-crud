@@ -321,6 +321,7 @@ export class RequestQueryParser implements ParsedRequestParams {
     customOperators: CustomOperators,
     data: string,
   ): QueryFilter {
+    console.log("LOG=", data);
     const isArrayValue = [
       'in',
       'notin',
