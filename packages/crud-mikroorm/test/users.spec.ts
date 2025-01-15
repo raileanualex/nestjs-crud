@@ -56,13 +56,8 @@ describe('UserService', () => {
   });
 
   it('should return an empty list when no users exist', async () => {
-    const cr: CrudRequest = {
-      parsed: undefined,
-      options: undefined
-    };
-    const user = await usersService.getMany(req);
+    const users = await usersService.findAll();
 
-    expect(user.nameFirst).toEqual("alex");
-    expect(user.nameLast).toEqual("raileanu");
+    expect(users[0].id).toEqual(1);
   });
 });

@@ -129,4 +129,9 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       // Implement logic here if soft deletes are enabled using a custom field like deletedAt.
       throw new BadRequestException('Recover not supported');
   }
+
+  async findAll(): Promise<T[]> {
+    return await this.repository.findAll();
+}
+  
 }
