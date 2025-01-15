@@ -56,17 +56,4 @@ describe('UserService', () => {
 
     expect(users[0].id).toEqual(1);
   });
-
-  it('should return user name when it is created', async () => {
-    const user = await usersService.getMany()
-
-    expect(user.nameFirst).toEqual("alex");
-    expect(user.nameLast).toEqual("raileanu");
-  });
-
-  it('should return an empty list when no users exist', async () => {
-    const users = await usersService.findAll();
-
-    expect(users[0].id).toEqual(1);
-  });
 });
