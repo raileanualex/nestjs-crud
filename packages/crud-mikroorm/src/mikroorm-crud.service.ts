@@ -55,6 +55,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
           ?.map((join) => join.field)
           .filter((field) => validFields.includes(field)) as unknown as Populate<T, string> | undefined;
 
+
       // Query the database
       const entity = await this.repository.findOne(filter, { populate });
 
@@ -131,7 +132,11 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   }
 
   async findAll(): Promise<T[]> {
-    return await this.repository.findAll();
-}
-  
+      return await this.repository.findAll();
+  }
+
+  transform(crudRequest: CrudRequest): any {
+    
+  }
+
 }

@@ -1,13 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EntityCaseNamingStrategy, MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { RequestQueryParser } from '@n4it/crud-request/request-query.parser';
 import { User } from '../src';
 import { UsersService } from '../src';
-import { RequestQueryBuilder } from '@n4it/crud-request';
-import { CrudRequest } from '@n4it/crud';
 
 jest.setTimeout(60000);
 
@@ -43,13 +39,26 @@ describe('UserService', () => {
     await orm.close(true);
   });
 
-  it('should return an empty list when no users exist', async () => {
+  it('should return user name when it is created', async () => {
     const user = await usersService.createOne(undefined, {
       nameFirst: "alex",
       nameLast: "raileanu",
       companyId: 1,
       email: "test@alex.com",
     });
+
+    expect(user.nameFirst).toEqual("alex");
+    expect(user.nameLast).toEqual("raileanu");
+  });
+
+  it('should return an empty list when no users exist', async () => {
+    const users = await usersService.findAll();
+
+    expect(users[0].id).toEqual(1);
+  });
+
+  it('should return user name when it is created', async () => {
+    const user = await usersService.getMany()
 
     expect(user.nameFirst).toEqual("alex");
     expect(user.nameLast).toEqual("raileanu");
