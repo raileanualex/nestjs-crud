@@ -39,7 +39,7 @@ describe('UserService', () => {
     await orm.close(true);
   });
 
-  it('should return user name when it is created', async () => {
+  it('should return user name after createOne', async () => {
     const user = await usersService.createOne(undefined, {
       nameFirst: "alex",
       nameLast: "raileanu",
@@ -51,7 +51,7 @@ describe('UserService', () => {
     expect(user.nameLast).toEqual("raileanu");
   });
 
-  it('should return an empty list when no users exist', async () => {
+  it('should return the id of the first user after findAll', async () => {
     const users = await usersService.findAll();
 
     expect(users[0].id).toEqual(1);
