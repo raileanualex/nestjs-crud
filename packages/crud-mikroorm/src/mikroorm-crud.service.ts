@@ -30,15 +30,11 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   constructor(
       private readonly em: EntityManager,
       private readonly entity: { new(): T },
+      private readonly repository: EntityRepository<T>,
   ) {
       super();
       this.entityName = entity.name;
       this.onInitMapEntityColumns();
-  }
-
-
-  private get repository(): EntityRepository<T> {
-      return this.em.getRepository(this.entity);
   }
 
   public get findOne() {
@@ -294,7 +290,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   }
 
   async findAll(): Promise<T[]> {
-      return await this.repository.findAll();
+    return await this.repository.findAll();
   }
 
   public getParamFilters(parsed: CrudRequest['parsed']): ObjectLiteral {

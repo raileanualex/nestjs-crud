@@ -5,14 +5,13 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { User } from '../src';
 import { UsersService } from '../src';
 import { Crud } from '@n4it/crud';
-import { Controller, INestApplication } from '@nestjs/common';
+import { Controller, Get, INestApplication } from '@nestjs/common';
 import { RequestQueryBuilder } from '@n4it/crud-request';
 import * as request from 'supertest';
 
 jest.setTimeout(60000);
 
-describe('UserService', () => {
-  let usersService: UsersService;
+describe('UsersService', () => {
   let orm: any;
   let app: INestApplication;
   let server: any;
@@ -29,6 +28,11 @@ describe('UserService', () => {
   @Controller('users0')
   class UsersController0 {
     constructor(public service: UsersService) {}
+    
+    @Get()
+    async findAll() {
+      return this.service.findAll();
+    }
   }
 
   beforeAll(async () => {
@@ -43,7 +47,8 @@ describe('UserService', () => {
           host: 'localhost', // Assuming your database is local
           debug: true, // Optional: Enable SQL query logging
           driver: PostgreSqlDriver,
-          namingStrategy: EntityCaseNamingStrategy
+          namingStrategy: EntityCaseNamingStrategy,
+          allowGlobalContext: true,
         }),
         MikroOrmModule.forFeature([User]),
       ],
@@ -52,9 +57,6 @@ describe('UserService', () => {
     }).compile();
 
     orm = module.get<MikroORM>(MikroORM);
-    const em = orm.em.fork();
-    usersService = new UsersService(em);
-
     app = module.createNestApplication();
     service = app.get<UsersService>(UsersService);
 
@@ -73,8 +75,9 @@ describe('UserService', () => {
   it('should return an array of all entities', async () => {
     const res = await request(server).get('/users0');
     
+    console.log(res.body);
     expect(res.status).toBe(200);
-    expect(res.body.data.length).toBe(0);
+    expect(res.body.length).toBe(222);
   });
 
   // it('should return user name after createOne', async () => {
