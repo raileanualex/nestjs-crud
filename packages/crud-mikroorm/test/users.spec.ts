@@ -75,7 +75,6 @@ describe('UsersService', () => {
   it('should return an array of all entities', async () => {
     const res = await request(server).get('/users0');
     
-    console.log(res.body);
     expect(res.status).toBe(200);
     expect(res.body.length).toBe(222);
   });
