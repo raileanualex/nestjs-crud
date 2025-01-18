@@ -1,13 +1,12 @@
 import {
   CreateManyDto,
   CrudRequest,
-  CrudRequestOptions,
   CrudService,
   GetManyDefaultResponse,
   QueryOptions,
 } from '@n4it/crud';
 
-import { ColumnType, ConnectionOptions, DeepPartial, EntityData, EntityManager, EntityMetadata, EntityRepository, Populate } from '@mikro-orm/core';
+import { ColumnType, DeepPartial, EntityData, EntityManager, EntityMetadata, EntityRepository, Populate } from '@mikro-orm/core';
 import { BadRequestException } from '@nestjs/common/exceptions';
 import { ParsedRequestParams } from '@n4it/crud-request/interfaces';
 import { hasLength, isArrayFull, isNil, isObject, isUndefined, ObjectLiteral, objKeys } from '@n4it/crud-util';
@@ -88,6 +87,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   
 
   async getMany(req: CrudRequest): Promise<GetManyDefaultResponse<T> | T[]> {
+    // TODO: adjust queries
       const { parsed, options } = req;
       const take = this.getTake(parsed, options.query);
       const skip = this.getSkip(parsed, take || 0);
@@ -108,6 +108,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
 
 
   async getOne(req: CrudRequest): Promise<T> {
+      // TODO: adjust queries
       const { parsed } = req;
 
       // Ensure the filter is valid
@@ -218,7 +219,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     shallow = false,
     withDeleted = false,
   ): Promise<T> {
-    //TODO
+    // TODO
     return;
   }
 
