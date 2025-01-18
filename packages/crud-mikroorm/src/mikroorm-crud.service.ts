@@ -7,17 +7,26 @@ import {
   QueryOptions,
 } from '@n4it/crud';
 
-import { DeepPartial, EntityData, EntityManager, EntityMetadata, EntityRepository, FilterQuery, Populate, QueryOrderMap } from '@mikro-orm/core';
+import { ColumnType, ConnectionOptions, DeepPartial, EntityData, EntityManager, EntityMetadata, EntityRepository, Populate } from '@mikro-orm/core';
 import { BadRequestException } from '@nestjs/common/exceptions';
 import { ParsedRequestParams } from '@n4it/crud-request/interfaces';
-import { hasLength, isArrayFull, isObject, isUndefined, ObjectLiteral, objKeys } from '@n4it/crud-util';
+import { hasLength, isArrayFull, isNil, isObject, isUndefined, ObjectLiteral, objKeys } from '@n4it/crud-util';
 import { plainToClass } from 'class-transformer';
+import { QueryFilter } from '@n4it/crud-request/types';
 
 export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = EntityData<T>> extends CrudService<T, EntityData<T>> {
   protected entityColumns: string[];
   protected entityPrimaryColumns: string[];
   protected entityName: string;
   protected entityColumnsHash: ObjectLiteral = {};
+  protected entityHasDeleteColumn: boolean = false;
+  protected dbName: string;
+  protected sqlInjectionRegEx: RegExp[] = [
+    /(%27)|(\')|(--)|(%23)|(#)/gi,
+    /((%3D)|(=))[^\n]*((%27)|(\')|(--)|(%3B)|(;))/gi,
+    /w*((%27)|(\'))((%6F)|o|(%4F))((%72)|r|(%52))/gi,
+    /((%27)|(\'))union/gi,
+  ];
 
   constructor(
       private readonly em: EntityManager,
@@ -25,7 +34,6 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   ) {
       super();
       this.entityName = entity.name;
-
       this.onInitMapEntityColumns();
   }
 
@@ -126,17 +134,32 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   }
 
   async createOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T> {
-      // const entity = this.prepareEntityBeforeSave(dto, req.parsed);
+      const { returnShallow } = req.options.routes.createOneBase;
+      const entity = this.prepareEntityBeforeSave(dto, req.parsed);
       
-      // if (!entity) {
-      //   this.throwBadRequestException(`Empty data. Nothing to save.`);
-      // }
+      if (!entity) {
+        this.throwBadRequestException(`Empty data. Nothing to save.`);
+      }
 
-      const savedEntity = this.repository.create(dto);
+      const savedEntity = this.repository.create(entity);
 
       await this.em.persistAndFlush(savedEntity);
 
-      return savedEntity;
+      if (returnShallow) {
+        return savedEntity;
+      }
+      const primaryParams = this.getPrimaryParams(req.options);
+
+      /* istanbul ignore next */
+      if (!primaryParams.length && primaryParams.some((p) => isNil(savedEntity[p]))) {
+        return savedEntity;
+      } else {
+        req.parsed.search = primaryParams.reduce(
+          (acc, p) => ({ ...acc, [p]: savedEntity[p] }),
+          {},
+        );
+        return this.getOneOrFail(req);
+      }
   }
 
   async createMany(req: CrudRequest, dto: CreateManyDto<DeepPartial<T>>): Promise<T[]> {
@@ -173,12 +196,20 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       : { ...found, ...dto, ...req.parsed.authPersist };
 
     // Prepare entity for saving (this can be skipped if the DTO is already an entity)
-    const entityToSave = plainToClass(this.entity, toSave, req.parsed.classTransformOptions);
+    const entityToUpdate = plainToClass(this.entity, toSave, req.parsed.classTransformOptions);
 
     // Save the entity (persist and flush in MikroORM)
-    await this.em.persistAndFlush(entityToSave);
+    await this.em.persistAndFlush(entityToUpdate);
 
-    return entityToSave;
+    if (returnShallow) {
+      return entityToUpdate;
+    } 
+
+    req.parsed.paramsFilter.forEach((filter) => {
+      filter.value = entityToUpdate[filter.field];
+    });
+
+    return this.getOneOrFail(req);
   }
 
 
@@ -235,16 +266,24 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   }
 
   async deleteOne(req: CrudRequest): Promise<void | T> {
-      const { parsed } = req;
-      const filter = parsed.filter || {}; // Ensure filter is valid
+    const { returnDeleted } = req.options.routes.deleteOneBase;
+    req.options.query.cache = false;
 
-      const entity = await this.repository.findOne(filter);
+    const found = await this.getOneOrFail(req, returnDeleted);
+    const toReturn = returnDeleted
+      ? plainToClass(this.entityType, { ...found }, req.parsed.classTransformOptions)
+      : undefined;
 
-      if (!entity) {
-          this.throwNotFoundException(this.entity.name);
-      }
+      
+    if (req.options.query.softDelete === true) {
+      // TODO: if we want soft delete, it must be implemented manually
+      // therefore T needs to extend a BaseEntity with deletedAt & id.
+      // await this.repository.nativeUpdate({ id: toReturn['id'] as any }, { deletedAt: new Date() });
+    } else {
+      await this.repository.nativeDelete(found);
+    }
 
-      await this.em.removeAndFlush(entity);
+    return toReturn;
   }
 
   async recoverOne(req: CrudRequest): Promise<void | T> {
@@ -268,6 +307,12 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     }
 
     return filters;
+  }
+  protected getEntityColumns(entityMetadata: EntityMetadata): { columns: string[]; primaryColumns: string[] } {
+    const columns = Object.keys(entityMetadata.properties); // all properties (columns) of the entity
+    const primaryColumns = entityMetadata.primaryKeys; // primary key columns are directly stored as strings
+  
+    return { columns, primaryColumns };
   }
 
   protected getAllowedColumns(columns: string[], options: QueryOptions): string[] {
@@ -402,4 +447,40 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     return entityInstance;
   }
 
+
+  protected checkFilterIsArray(cond: QueryFilter, withLength?: boolean) {
+    /* istanbul ignore if */
+    if (
+      !Array.isArray(cond.value) ||
+      !cond.value.length ||
+      (!isNil(withLength) ? withLength : false)
+    ) {
+      this.throwBadRequestException(`Invalid column '${cond.field}' value`);
+    }
+  }
+
+
+  protected checkSqlInjection(field: string): string {
+    /* istanbul ignore else */
+    if (this.sqlInjectionRegEx.length) {
+      for (let i = 0; i < this.sqlInjectionRegEx.length; i++) {
+        /* istanbul ignore else */
+        if (this.sqlInjectionRegEx[i].test(field)) {
+          this.throwBadRequestException(`SQL injection detected: "${field}"`);
+        }
+      }
+    }
+
+    return field;
+  }
+  protected getColumnType(field: string): ColumnType | undefined {
+      // Get the EntityMetadata for the repository's entity
+      const metadata = this.em.getMetadata(this.entityName);
+    
+      // Find the column by its property name in metadata.props
+      const column = metadata.props[field];
+    
+      // Return the column type or undefined if not found
+      return column?.type;
+  }
 }
