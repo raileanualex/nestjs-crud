@@ -3,7 +3,7 @@
   "description": "NestJs CRUD for RESTful APIs - MikroORM",
   "version": "1.0.9",
   "license": "GPL-3.0",
-  "main": "lib/index.js",
+  "main": "src/main.ts",
   "typings": "lib/index.d.ts",
   "publishConfig": {
     "access": "public",
@@ -37,10 +37,12 @@
     "email": "hello@n4it.nl"
   },
   "scripts": {
-    "build": "npx tsc -b"
+    "build": "npx tsc -b",
+    "start": "nest start --watch --entryFile local/main.js"
   },
   "devDependencies": {
-    "@n4it/crud": "^1.0.9"
+    "@n4it/crud": "^1.0.9",
+    "@nestjs/cli": "^10.4.9"
   },
   "dependencies": {
     "@mikro-orm/core": "^6.4.3",

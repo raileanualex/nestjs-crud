@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
 import { EntityManager } from '@mikro-orm/core';
-import { MikroOrmCrudService, User } from '.';
+import { MikroOrmCrudService } from '../../src/mikroorm-crud.service';
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersService extends MikroOrmCrudService<User> {
@@ -9,4 +10,3 @@ export class UsersService extends MikroOrmCrudService<User> {
     super(entityManager, User, entityManager.getRepository(User));
   }
 }
-
