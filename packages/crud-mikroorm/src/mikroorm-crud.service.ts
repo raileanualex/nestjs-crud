@@ -23,14 +23,16 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     /w*((%27)|(\'))((%6F)|o|(%4F))((%72)|r|(%52))/gi,
     /((%27)|(\'))union/gi,
   ];
+  private readonly repository: EntityRepository<T>;
 
   constructor(
     private readonly em: EntityManager,
     private readonly entity: { new(): T },
-    private readonly repository: EntityRepository<T>,
   ) {
     super();
     this.entityName = entity.name;
+    this.repository = em.getRepository(entity);
+    
     this.onInitMapEntityColumns();
   }
 
@@ -143,6 +145,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   }
 
   async createOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T> {
+    this.em.getValidator().validate(this.entity, dto, this.em.getMetadata().get(this.entityName));
     this.validateSqlInjectionFields(req);
     const returnShallow = req?.options?.routes?.createOneBase.returnShallow || true;
     const entity = this.prepareEntityBeforeSave(dto, req?.parsed);
@@ -171,15 +174,17 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     }
   }
 
-  async createMany(req: CrudRequest, dto: CreateManyDto<DeepPartial<T>>): Promise<T[]> {
+  async createMany(req: CrudRequest, dtoList: CreateManyDto<DeepPartial<T>>): Promise<T[]> {
     this.validateSqlInjectionFields(req);
-    if (!isObject(dto) || !isArrayFull(dto.bulk)) {
+    if (!isObject(dtoList) || !isArrayFull(dtoList.bulk)) {
       this.throwBadRequestException(`Empty data. Nothing to save.`);
     }
 
-    const bulk = dto.bulk
+    const bulk = dtoList.bulk
       .map((one) => this.prepareEntityBeforeSave(one, req.parsed))
       .filter((d) => !isUndefined(d));
+    
+      bulk.forEach(dto => this.em.getValidator().validate(this.entity, dto, this.em.getMetadata().get(this.entityName)));
 
     if (!hasLength(bulk)) {
       this.throwBadRequestException(`Empty data. Nothing to save.`);
