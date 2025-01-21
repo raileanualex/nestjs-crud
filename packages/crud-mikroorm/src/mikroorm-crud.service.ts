@@ -6,9 +6,10 @@ import {
   QueryOptions,
 } from '@n4it/crud';
 
-import { DeepPartial, EntityData, EntityManager, EntityMetadata, EntityRepository, FilterQuery } from '@mikro-orm/core';
+import { DeepPartial, EntityData, EntityManager, EntityMetadata, EntityRepository, FilterQuery, ValidationError } from '@mikro-orm/core';
 import { hasLength, isArrayFull, isNil, isObject, isUndefined, ObjectLiteral, objKeys } from '@n4it/crud-util';
 import { plainToClass } from 'class-transformer';
+import { BadRequestException } from '@nestjs/common';
 
 export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = EntityData<T>> extends CrudService<T, EntityData<T>> {
   protected entityColumns: string[];
@@ -145,7 +146,6 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   }
 
   async createOne(req: CrudRequest, dto: DeepPartial<T>): Promise<T> {
-    this.em.getValidator().validate(this.entity, dto, this.em.getMetadata().get(this.entityName));
     this.validateSqlInjectionFields(req);
     const returnShallow = req?.options?.routes?.createOneBase.returnShallow || true;
     const entity = this.prepareEntityBeforeSave(dto, req?.parsed);
@@ -153,10 +153,19 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     if (!entity) {
       this.throwBadRequestException(`Empty data. Nothing to save.`);
     }
-
     const savedEntity = this.repository.create(entity);
 
-    await this.em.persistAndFlush(savedEntity);
+    try {
+      await this.em.persistAndFlush(savedEntity);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        console.log(error);
+        this.throwBadRequestException(error.message);
+      }
+
+      throw console.error();
+      ;
+    }
 
     if (returnShallow) {
       return savedEntity;
@@ -184,13 +193,19 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       .map((one) => this.prepareEntityBeforeSave(one, req.parsed))
       .filter((d) => !isUndefined(d));
     
-      bulk.forEach(dto => this.em.getValidator().validate(this.entity, dto, this.em.getMetadata().get(this.entityName)));
-
     if (!hasLength(bulk)) {
       this.throwBadRequestException(`Empty data. Nothing to save.`);
     }
 
-    await this.em.persistAndFlush(bulk);
+    try {
+      await this.em.persistAndFlush(bulk);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        this.throwBadRequestException(error.message);
+      }
+
+      throw error;
+    }
 
     return bulk;
   }
