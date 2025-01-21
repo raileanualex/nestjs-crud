@@ -7,7 +7,6 @@ import {
 } from '@n4it/crud';
 
 import { DeepPartial, EntityData, EntityManager, EntityMetadata, EntityRepository, FilterQuery } from '@mikro-orm/core';
-import { BadRequestException } from '@nestjs/common/exceptions';
 import { hasLength, isArrayFull, isNil, isObject, isUndefined, ObjectLiteral, objKeys } from '@n4it/crud-util';
 import { plainToClass } from 'class-transformer';
 
@@ -433,6 +432,10 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     await this.repository.nativeDelete(found);
 
     return toReturn;
+  }
+
+  recoverOne(req: CrudRequest): Promise<void | T> {
+    throw new Error('Method not implemented.');
   }
 
   async findAll(): Promise<T[]> {

@@ -5,9 +5,8 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { Crud, CrudRequest } from '@n4it/crud';
 import { Controller, Get, INestApplication, Param, Query } from '@nestjs/common';
 import { RequestQueryBuilder } from '@n4it/crud-request';
-import * as request from 'supertest';
-import { UsersService } from './__fixtures__/users.service';
-import { User } from './__fixtures__/user.entity';
+import { UsersService } from './__fixture__/users.service';
+import { User } from './__fixture__/user.entity';
 
 jest.setTimeout(60000);
 
