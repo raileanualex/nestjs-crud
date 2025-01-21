@@ -62,27 +62,6 @@ describe('UsersService', () => {
     await orm.close(true);
   });
 
-  beforeEach(() => {
-    qb = RequestQueryBuilder.create();
-  });
-
-  // This will work only if you have the same number in database
-  // it('should return an array of all entities', async () => {
-  //   const res = await request(server).get('/users0');
-    
-  //   expect(res.status).toBe(200);
-  //   expect(res.body.length).toBe(6);
-  // });
-
-  // it('should return an array of the entity with nameFirst=alex', async () => {
-  //   const query = qb.search({ 'nameFirst': { $eq: "alex" } }).query();
-       
-  //   const res = await request(server).get('/users0').query(query);
-    
-  //   expect(res.status).toBe(200);
-  //   expect(res.body.length).toBe(1);
-  // });
-
   it('should return user name after createOne', async () => {
     const user = await service.createOne(undefined, {
       nameFirst: "alex",
