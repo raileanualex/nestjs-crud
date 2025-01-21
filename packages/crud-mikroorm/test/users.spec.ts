@@ -2,12 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EntityCaseNamingStrategy, MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { User } from '../src';
-import { UsersService } from '../src';
-import { Crud } from '@n4it/crud';
-import { Controller, Get, INestApplication } from '@nestjs/common';
+import { Crud, CrudRequest } from '@n4it/crud';
+import { Controller, Get, INestApplication, Param, Query } from '@nestjs/common';
 import { RequestQueryBuilder } from '@n4it/crud-request';
-import * as request from 'supertest';
+import { UsersService } from './__fixture__/users.service';
+import { User } from './__fixture__/user.entity';
 
 jest.setTimeout(60000);
 
@@ -28,11 +27,6 @@ describe('UsersService', () => {
   @Controller('users0')
   class UsersController0 {
     constructor(public service: UsersService) {}
-    
-    @Get()
-    async findAll() {
-      return this.service.findAll();
-    }
   }
 
   beforeAll(async () => {
@@ -72,28 +66,36 @@ describe('UsersService', () => {
     qb = RequestQueryBuilder.create();
   });
 
-  it('should return an array of all entities', async () => {
-    const res = await request(server).get('/users0');
+  // This will work only if you have the same number in database
+  // it('should return an array of all entities', async () => {
+  //   const res = await request(server).get('/users0');
     
-    expect(res.status).toBe(200);
-    expect(res.body.length).toBe(222);
+  //   expect(res.status).toBe(200);
+  //   expect(res.body.length).toBe(6);
+  // });
+
+  // it('should return an array of the entity with nameFirst=alex', async () => {
+  //   const query = qb.search({ 'nameFirst': { $eq: "alex" } }).query();
+       
+  //   const res = await request(server).get('/users0').query(query);
+    
+  //   expect(res.status).toBe(200);
+  //   expect(res.body.length).toBe(1);
+  // });
+
+  it('should return user name after createOne', async () => {
+    const user = await service.createOne(undefined, {
+      nameFirst: "alex",
+      nameLast: "raileanu"
+    });
+
+    expect(user.nameFirst).toEqual("alex");
+    expect(user.nameLast).toEqual("raileanu");
   });
 
-  // it('should return user name after createOne', async () => {
-  //   const user = await service.createOne(undefined, {
-  //     nameFirst: "alex",
-  //     nameLast: "raileanu",
-  //     companyId: 1,
-  //     email: "test@alex.com",
-  //   });
+  it('should return the id of the first user after findAll', async () => {
+    const users = await service.findAll();
 
-  //   expect(user.nameFirst).toEqual("alex");
-  //   expect(user.nameLast).toEqual("raileanu");
-  // });
-
-  // it('should return the id of the first user after findAll', async () => {
-  //   const users = await service.findAll();
-
-  //   expect(users[0].id).toEqual(1);
-  // });
+    expect(users[0].id).toEqual(1);
+  });
 });
