@@ -33,7 +33,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     super();
     this.entityName = entity.name;
     this.repository = em.getRepository(entity);
-    
+
     this.onInitMapEntityColumns();
   }
 
@@ -48,6 +48,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   public get find() {
     return this.repository.find.bind(this.repository);
   }
+ 
 
   public get count() {
     return this.repository.count.bind(this.repository);
@@ -81,14 +82,14 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   }
 
   validateFields(fields: string[]) {
-    for(const field of fields) {
+    for (const field of fields) {
       if (this.entityColumnsHash[field] !== field) {
         this.throwBadRequestException(`Invalid field: ${field}`)
       }
     }
   }
 
-  validateFilterFields(filter){
+  validateFilterFields(filter) {
     Object.keys(filter).forEach(field => {
       if (this.entityColumnsHash[field] !== field) {
         this.throwBadRequestException(`Invalid field: ${field}`)
@@ -102,13 +103,12 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     const { parsed, options } = req;
     const take = this.getTake(parsed, options.query);
     const skip = this.getSkip(parsed, take || 0);
-    const filter = this.transformParsedToMikro(parsed);
+    let filter = this.transformParsedToMikro(parsed);
     this.validateFilterFields(filter);
-
     let queryOptions = this.transformOptionsToMikro(options);
 
     const populate = parsed.join.map(option => option.field);
-    
+
     if (populate) {
       this.validateFields(parsed.fields);
       queryOptions = {
@@ -124,6 +124,13 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
         ...queryOptions,
         fields: parsed.fields as any,
       }
+    }
+
+    if (this.hasDeletedAtColumn()) {
+      filter = {
+        ...filter,
+        deletedAt: null, // Add condition to exclude soft-deleted entities
+      } as any;
     }
 
     const [data, total] = await this.repository.findAndCount(filter, {
@@ -159,7 +166,6 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       await this.em.persistAndFlush(savedEntity);
     } catch (error) {
       if (error instanceof ValidationError) {
-        console.log(error);
         this.throwBadRequestException(error.message);
       }
 
@@ -192,7 +198,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     const bulk = dtoList.bulk
       .map((one) => this.prepareEntityBeforeSave(one, req.parsed))
       .filter((d) => !isUndefined(d));
-    
+
     if (!hasLength(bulk)) {
       this.throwBadRequestException(`Empty data. Nothing to save.`);
     }
@@ -241,12 +247,12 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
 
     return this.getOneOrFail(req);
   }
-  
+
   protected transformSort(sortFields: any[]) {
     return sortFields.reduce((acc, sortField) => {
-      acc[sortField.field] = sortField.order; 
+      acc[sortField.field] = sortField.order;
       return acc;
-    }, {}); 
+    }, {});
   }
 
   protected applyCondition(field: string, operator: string, value: string) {
@@ -312,10 +318,10 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     parsed.paramsFilter.forEach((filter) => {
       const { field, operator, value } = filter;
       const condition = this.applyCondition(field, operator, value);
-     
+
       Object.assign(whereConditions, condition);
     });
-  
+
     // Handle search condition ($and)
     if (parsed.search && parsed.search?.$and) {
       parsed.search.$and.forEach((condition) => {
@@ -325,7 +331,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
         }
       });
     }
-  
+
     // Handle or condition ($or)
     if (parsed.search && parsed.search?.$or?.length > 0) {
       whereConditions.$or = parsed.search.$or.map((condition) => {
@@ -337,47 +343,47 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     return whereConditions;
   }
 
-  
+
   protected transformOptionsToMikro(options) {
-      const mikroOptions: any = {};
-    
-      // Handle pagination settings
-      if (options?.query && options?.query?.alwaysPaginate) {
-        mikroOptions.limit = options.query.limit || 10; 
-        mikroOptions.offset = options.query.offset || 0;
-      }
-    
-      // Handle sorting options
-      if (options.query && options.query.sort) {
-        mikroOptions.orderBy = options.query.sort.map((sortField) => {
-          return {
-            [sortField.field]: sortField.direction || 'ASC'
-          };
-        });
-      }
-    
-      if (options.query && options.query.select) {
-        mikroOptions.select = options.query.select;
-      }
-    
-      if (options.routes) {
-        mikroOptions.routes = options.routes;
-      }
-    
-      if (options.routes && options.routes.createOneBase && options.routes.createOneBase.returnShallow !== undefined) {
-        mikroOptions.returnShallow = options.routes.createOneBase.returnShallow;
-      }
-    
-      return mikroOptions;
+    const mikroOptions: any = {};
+
+    // Handle pagination settings
+    if (options?.query && options?.query?.alwaysPaginate) {
+      mikroOptions.limit = options.query.limit || 10;
+      mikroOptions.offset = options.query.offset || 0;
+    }
+
+    // Handle sorting options
+    if (options.query && options.query.sort) {
+      mikroOptions.orderBy = options.query.sort.map((sortField) => {
+        return {
+          [sortField.field]: sortField.direction || 'ASC'
+        };
+      });
+    }
+
+    if (options.query && options.query.select) {
+      mikroOptions.select = options.query.select;
+    }
+
+    if (options.routes) {
+      mikroOptions.routes = options.routes;
+    }
+
+    if (options.routes && options.routes.createOneBase && options.routes.createOneBase.returnShallow !== undefined) {
+      mikroOptions.returnShallow = options.routes.createOneBase.returnShallow;
+    }
+
+    return mikroOptions;
   }
-  
+
   protected async getOneOrFail(
     req: CrudRequest,
     withDeleted = false,
   ): Promise<T> {
     const { parsed, options } = req;
 
-    const filter: FilterQuery<T> = this.transformParsedToMikro(parsed);
+    let filter: FilterQuery<T> = this.transformParsedToMikro(parsed);
     let queryOptions: any = this.transformOptionsToMikro(options);
     if (parsed.fields?.length > 0) {
       queryOptions = {
@@ -385,6 +391,13 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
         fields: parsed.fields as any
       }
     };
+
+    if (!withDeleted && this.hasDeletedAtColumn()) {
+      filter = {
+        ...filter,
+        deletedAt: null, // Add condition to exclude soft-deleted entities
+      } as any;
+    }
 
     const found = await this.repository.findOne(filter, queryOptions);
 
@@ -449,13 +462,37 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       ? plainToClass(this.entityType, { ...found }, req.parsed.classTransformOptions)
       : undefined;
 
-    await this.repository.nativeDelete(found);
+    const hasDeletedAtColumn = this.hasDeletedAtColumn()
+
+    if (req.options.query.softDelete === true && hasDeletedAtColumn) {
+      await this.softDelete(found);
+    } else {
+      await this.repository.nativeDelete(found);
+    }
 
     return toReturn;
   }
 
-  recoverOne(req: CrudRequest): Promise<void | T> {
-    throw new Error('Method not implemented.');
+  protected hasDeletedAtColumn(): boolean {
+    const entityMetadata = this.em.getMetadata().get(this.entity.name);
+
+    const { columns } = this.getEntityColumns(entityMetadata);
+    return columns.includes('deletedAt');
+  }
+
+  async softDelete(entity: T) {
+    (entity as any).deletedAt = new Date(); // Mark as deleted
+    await this.em.persistAndFlush(entity); // Save changes
+  }
+
+  async recoverOne(req: CrudRequest): Promise<void | T> {
+    //req.options.query.cache = false;
+    const found = await this.getOneOrFail(req, true);
+
+    if (this.hasDeletedAtColumn()) {
+      (found as any).deletedAt = null; // Remove the deleted flag
+      await this.em.persistAndFlush(found); // Persist changes
+    }
   }
 
   async findAll(): Promise<T[]> {
