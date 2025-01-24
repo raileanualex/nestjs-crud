@@ -231,6 +231,9 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
 
     // Fetch the entity, return null if not found
     const found = await this.getOneOrFail(req, returnShallow).catch(() => null);
+    if (found == null) {
+      this.throwNotFoundException(this.alias);
+    }
 
     // Merge the entity with dto and filters
     const toUpdate = !allowParamsOverride
@@ -430,6 +433,10 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
 
     // Fetch the entity, return null if not found
     const found = await this.getOneOrFail(req, returnShallow).catch(() => null);
+
+    if (found == null) {
+      this.throwNotFoundException(this.alias);
+    }
 
     // Merge the entity with dto and filters
     const toSave = !allowParamsOverride
