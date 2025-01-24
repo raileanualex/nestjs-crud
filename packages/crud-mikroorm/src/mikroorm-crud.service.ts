@@ -6,7 +6,7 @@ import {
   QueryOptions,
 } from '@n4it/crud';
 
-import { DeepPartial, EntityClass, EntityData, EntityManager, EntityMetadata, EntityRepository, FilterQuery, ValidationError } from '@mikro-orm/core';
+import { DeepPartial, EntityClass, EntityData, EntityManager, EntityMetadata, EntityRepository, FilterQuery, ValidationError, wrap } from '@mikro-orm/core';
 import { hasLength, isArrayFull, isNil, isObject, isUndefined, ObjectLiteral, objKeys } from '@n4it/crud-util';
 import { ClassConstructor, plainToClass } from 'class-transformer';
 
@@ -212,25 +212,51 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   }
 
   async updateOne(req: CrudRequest, dto: DTO): Promise<T> {
-    const { allowParamsOverride, returnShallow } = req.options.routes.updateOneBase;
+    // const { allowParamsOverride, returnShallow } = req.options.routes.updateOneBase;
+    // const paramsFilters = this.getParamFilters(req.parsed);
+
+    // // Disable cache while updating
+    // req.options.query.cache = false;
+
+    // // Fetch the entity
+    // const found = await this.getOneOrFail(req, returnShallow);
+
+    // // Merge the entity with dto and filters
+    // const toSave = !allowParamsOverride
+    // ? { ...(found || {}), ...dto, ...paramsFilters, ...req.parsed.authPersist }
+    // : { ...(found || {}), ...paramsFilters, ...dto, ...req.parsed.authPersist };
+
+    // // Prepare entity for saving (this can be skipped if the DTO is already an entity)
+    // const entityToSave = plainToClass(this.entity as ClassConstructor<T>, toSave, req.parsed.classTransformOptions);
+
+    // wrap(found).assign(entityToSave as Partial<EntityData<T>>);
+    // console.log("LOG=UPDATING ENTITY");
+
+    const { allowParamsOverride, returnShallow } = req.options.routes.replaceOneBase;
     const paramsFilters = this.getParamFilters(req.parsed);
 
-    // Disable cache while updating
+    // Disable cache while replacing
     req.options.query.cache = false;
 
-    // Fetch the entity
-    const found = await this.getOneOrFail(req, returnShallow);
+    // Fetch the entity, return null if not found
+    const found = await this.getOneOrFail(req, returnShallow).catch(() => null);
 
-    // Merge the dto with existing entity data
-    const toSave = !allowParamsOverride
-      ? { ...found, ...dto, ...paramsFilters, ...req.parsed.authPersist }
-      : { ...found, ...dto, ...req.parsed.authPersist };
+    // Merge the entity with dto and filters
+    const toUpdate = !allowParamsOverride
+      ? { ...dto, ...paramsFilters, ...req.parsed.authPersist }
+      : { ...paramsFilters, ...dto, ...req.parsed.authPersist };
 
     // Prepare entity for saving (this can be skipped if the DTO is already an entity)
-    const entityToUpdate = plainToClass(this.entity as ClassConstructor<T>, toSave, req.parsed.classTransformOptions);
+    const entityToUpdate = plainToClass(this.entity as ClassConstructor<T>, toUpdate, req.parsed.classTransformOptions);
+
+    wrap(found).assign(toUpdate as Partial<EntityData<T>>);
+
+    await this.em.flush();
+     // Flush the changes (no need for persist as the entity is already managed)
+     await this.em.flush();
 
     // Save the entity (persist and flush in MikroORM)
-    await this.em.persistAndFlush(entityToUpdate);
+    await this.em.flush();
 
     if (returnShallow) {
       return entityToUpdate;
@@ -422,7 +448,9 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     // Prepare entity for saving (this can be skipped if the DTO is already an entity)
     const entityToSave = plainToClass(this.entity as ClassConstructor<T>, toSave, req.parsed.classTransformOptions);
 
-    await this.em.persistAndFlush(entityToSave);
+    wrap(found).assign(entityToSave as Partial<EntityData<T>>);
+
+    await this.em.flush();
 
     if (returnShallow) {
       return entityToSave;
