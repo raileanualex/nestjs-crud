@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "lib",
+    "esModuleInterop": true
+  },
+  "include": ["src", "local"],
+  "exclude": ["lib"],
+  "references": [
+    { "path": "../crud-util" },
+    { "path": "../crud-request" },
+    { "path": "../crud" }
+  ]
+}
