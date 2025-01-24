@@ -6,10 +6,9 @@ import {
   QueryOptions,
 } from '@n4it/crud';
 
-import { DeepPartial, EntityData, EntityManager, EntityMetadata, EntityRepository, FilterQuery, ValidationError } from '@mikro-orm/core';
+import { DeepPartial, EntityClass, EntityData, EntityManager, EntityMetadata, EntityRepository, FilterQuery, ValidationError } from '@mikro-orm/core';
 import { hasLength, isArrayFull, isNil, isObject, isUndefined, ObjectLiteral, objKeys } from '@n4it/crud-util';
-import { plainToClass } from 'class-transformer';
-import { BadRequestException } from '@nestjs/common';
+import { ClassConstructor, plainToClass } from 'class-transformer';
 
 export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = EntityData<T>> extends CrudService<T, EntityData<T>> {
   protected entityColumns: string[];
@@ -18,21 +17,21 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   protected entityColumnsHash: ObjectLiteral = {};
   protected entityHasDeleteColumn: boolean = false;
   protected dbName: string;
+  protected entity: EntityClass<any>;
+  protected em: EntityManager;
+
   protected sqlInjectionRegEx: RegExp[] = [
     /(%27)|(\')|(--)|(%23)|(#)/gi,
     /((%3D)|(=))[^\n]*((%27)|(\')|(--)|(%3B)|(;))/gi,
     /w*((%27)|(\'))((%6F)|o|(%4F))((%72)|r|(%52))/gi,
     /((%27)|(\'))union/gi,
   ];
-  private readonly repository: EntityRepository<T>;
-
-  constructor(
-    private readonly em: EntityManager,
-    private readonly entity: { new(): T },
-  ) {
+  constructor(private readonly repository: EntityRepository<T>) {
     super();
-    this.entityName = entity.name;
-    this.repository = em.getRepository(entity);
+
+    this.entityName = this.repository.getEntityName(); // get entity name from repository
+    this.em = this.repository.getEntityManager(); // create entity manager from repository
+    this.entity = this.em.getMetadata().get(this.entityName).class;
 
     this.onInitMapEntityColumns();
   }
@@ -52,10 +51,6 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
 
   public get count() {
     return this.repository.count.bind(this.repository);
-  }
-
-  protected get entityType(): { new(): T } {
-    return this.entity;
   }
 
   protected get alias(): string {
@@ -232,7 +227,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       : { ...found, ...dto, ...req.parsed.authPersist };
 
     // Prepare entity for saving (this can be skipped if the DTO is already an entity)
-    const entityToUpdate = plainToClass(this.entity, toSave, req.parsed.classTransformOptions);
+    const entityToUpdate = plainToClass(this.entity as ClassConstructor<T>, toSave, req.parsed.classTransformOptions);
 
     // Save the entity (persist and flush in MikroORM)
     await this.em.persistAndFlush(entityToUpdate);
@@ -425,7 +420,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       : { ...(found || {}), ...paramsFilters, ...dto, ...req.parsed.authPersist };
 
     // Prepare entity for saving (this can be skipped if the DTO is already an entity)
-    const entityToSave = plainToClass(this.entity, toSave, req.parsed.classTransformOptions);
+    const entityToSave = plainToClass(this.entity as ClassConstructor<T>, toSave, req.parsed.classTransformOptions);
 
     await this.em.persistAndFlush(entityToSave);
 
@@ -459,7 +454,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
 
     const found = await this.getOneOrFail(req, returnDeleted);
     const toReturn = returnDeleted
-      ? plainToClass(this.entityType, { ...found }, req.parsed.classTransformOptions)
+      ? plainToClass(this.entity as ClassConstructor<T>, { ...found }, req.parsed.classTransformOptions)
       : undefined;
 
     const hasDeletedAtColumn = this.hasDeletedAtColumn()
@@ -563,7 +558,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     }
 
     // Transform plain DTO into an entity if it's not an instance of the entity type
-    const entityInstance = plainToClass(this.entity, { ...dto, ...parsed.authPersist }, parsed.classTransformOptions);
+    const entityInstance = plainToClass(this.entity as ClassConstructor<T>, { ...dto, ...parsed.authPersist }, parsed.classTransformOptions);
 
     return entityInstance;
   }

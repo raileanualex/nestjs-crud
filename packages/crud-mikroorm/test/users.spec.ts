@@ -14,7 +14,6 @@ describe('UsersService', () => {
   let orm: any;
   let app: INestApplication;
   let server: any;
-  let qb: RequestQueryBuilder;
   let service: UsersService;
 
   @Crud({
@@ -63,7 +62,25 @@ describe('UsersService', () => {
   });
 
   it('should return user name after createOne', async () => {
-    const user = await service.createOne(undefined, {
+    const user = await service.createOne({
+      parsed: {
+        fields: [],
+        paramsFilter: [],
+        authPersist: {},
+        classTransformOptions: {},
+        search: {},
+        filter: [],
+        or: [],
+        join: [],
+        sort: [],
+        limit: 0,
+        offset: 0,
+        page: 1,
+        cache: 0,
+        includeDeleted: 0,
+      },
+      options: undefined
+    }, {
       nameFirst: "alex",
       nameLast: "raileanu"
     });
