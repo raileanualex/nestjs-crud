@@ -12,6 +12,7 @@ import { Users } from "./user-mikroorm.entity";
   query: {
     alwaysPaginate: true,
     limit: 10,
+    softDelete: true,
   },
   routes: {
     createOneBase: {

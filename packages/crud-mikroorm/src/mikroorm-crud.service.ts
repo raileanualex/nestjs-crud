@@ -15,7 +15,8 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   protected entityPrimaryColumns: string[];
   protected entityName: string;
   protected entityColumnsHash: ObjectLiteral = {};
-  protected entityHasDeleteColumn: boolean = false;
+  protected entityHasDeletedColumn: boolean = false;
+  protected deletedAtColumnName: string = "";
   protected dbName: string;
   protected entity: EntityClass<any>;
   protected em: EntityManager;
@@ -74,6 +75,16 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     this.entityPrimaryColumns = Object.values(metadata.properties)
       .filter((prop) => prop.primary) // Check if the property is a primary key
       .map((prop) => prop.name);
+
+    if (this.entityColumnsHash['deletedAt']) {
+      this.deletedAtColumnName = 'deletedAt';
+      this.entityHasDeletedColumn = true;
+    }
+
+    if (this.entityColumnsHash['deleted_at']) {
+      this.deletedAtColumnName = 'deleted_at';
+      this.entityHasDeletedColumn = true;
+    }
   }
 
   validateFields(fields: string[]) {
@@ -121,10 +132,10 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       }
     }
 
-    if (this.hasDeletedAtColumn()) {
+    if (this.entityHasDeletedColumn) {
       filter = {
         ...filter,
-        deletedAt: null, // Add condition to exclude soft-deleted entities
+        [this.deletedAtColumnName]: null, 
       } as any;
     }
 
@@ -212,26 +223,6 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
   }
 
   async updateOne(req: CrudRequest, dto: DTO): Promise<T> {
-    // const { allowParamsOverride, returnShallow } = req.options.routes.updateOneBase;
-    // const paramsFilters = this.getParamFilters(req.parsed);
-
-    // // Disable cache while updating
-    // req.options.query.cache = false;
-
-    // // Fetch the entity
-    // const found = await this.getOneOrFail(req, returnShallow);
-
-    // // Merge the entity with dto and filters
-    // const toSave = !allowParamsOverride
-    // ? { ...(found || {}), ...dto, ...paramsFilters, ...req.parsed.authPersist }
-    // : { ...(found || {}), ...paramsFilters, ...dto, ...req.parsed.authPersist };
-
-    // // Prepare entity for saving (this can be skipped if the DTO is already an entity)
-    // const entityToSave = plainToClass(this.entity as ClassConstructor<T>, toSave, req.parsed.classTransformOptions);
-
-    // wrap(found).assign(entityToSave as Partial<EntityData<T>>);
-    // console.log("LOG=UPDATING ENTITY");
-
     const { allowParamsOverride, returnShallow } = req.options.routes.replaceOneBase;
     const paramsFilters = this.getParamFilters(req.parsed);
 
@@ -249,13 +240,8 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     // Prepare entity for saving (this can be skipped if the DTO is already an entity)
     const entityToUpdate = plainToClass(this.entity as ClassConstructor<T>, toUpdate, req.parsed.classTransformOptions);
 
-    wrap(found).assign(toUpdate as Partial<EntityData<T>>);
+    wrap(found).assign(toUpdate as Partial<EntityData<T>>, { merge: true});
 
-    await this.em.flush();
-     // Flush the changes (no need for persist as the entity is already managed)
-     await this.em.flush();
-
-    // Save the entity (persist and flush in MikroORM)
     await this.em.flush();
 
     if (returnShallow) {
@@ -413,10 +399,10 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       }
     };
 
-    if (!withDeleted && this.hasDeletedAtColumn()) {
+    if (!withDeleted && this.entityHasDeletedColumn) {
       filter = {
         ...filter,
-        deletedAt: null, // Add condition to exclude soft-deleted entities
+        [this.deletedAtColumnName]: null, // Add condition to exclude soft-deleted entities // deleted_at to include
       } as any;
     }
 
@@ -485,22 +471,13 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       ? plainToClass(this.entity as ClassConstructor<T>, { ...found }, req.parsed.classTransformOptions)
       : undefined;
 
-    const hasDeletedAtColumn = this.hasDeletedAtColumn()
-
-    if (req.options.query.softDelete === true && hasDeletedAtColumn) {
+    if (req.options.query.softDelete === true && this.entityHasDeletedColumn) {
       await this.softDelete(found);
     } else {
       await this.repository.nativeDelete(found);
     }
 
     return toReturn;
-  }
-
-  protected hasDeletedAtColumn(): boolean {
-    const entityMetadata = this.em.getMetadata().get(this.entity.name);
-
-    const { columns } = this.getEntityColumns(entityMetadata);
-    return columns.includes('deletedAt');
   }
 
   async softDelete(entity: T) {
@@ -512,7 +489,7 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
     //req.options.query.cache = false;
     const found = await this.getOneOrFail(req, true);
 
-    if (this.hasDeletedAtColumn()) {
+    if (this.entityHasDeletedColumn) {
       (found as any).deletedAt = null; // Remove the deleted flag
       await this.em.persistAndFlush(found); // Persist changes
     }
