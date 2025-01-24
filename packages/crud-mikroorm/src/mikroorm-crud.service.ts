@@ -237,10 +237,15 @@ export class MikroOrmCrudService<T extends object, DTO extends EntityData<T> = E
       ? { ...dto, ...paramsFilters, ...req.parsed.authPersist }
       : { ...paramsFilters, ...dto, ...req.parsed.authPersist };
 
-    // Prepare entity for saving (this can be skipped if the DTO is already an entity)
-    const entityToUpdate = plainToClass(this.entity as ClassConstructor<T>, toUpdate, req.parsed.classTransformOptions);
+      // Remove undefined fields from the object
+    const filteredToUpdate = Object.fromEntries(
+      Object.entries(toUpdate).filter(([_, value]) => value !== undefined)
+    );
 
-    wrap(found).assign(toUpdate as Partial<EntityData<T>>, { merge: true});
+    // Prepare entity for saving (this can be skipped if the DTO is already an entity)
+    const entityToUpdate = plainToClass(this.entity as ClassConstructor<T>, filteredToUpdate, req.parsed.classTransformOptions);
+
+    wrap(found).assign(filteredToUpdate as Partial<EntityData<T>>, { merge: true});
 
     await this.em.flush();
 
